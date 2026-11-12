@@ -15,7 +15,7 @@ tags:
 
 # Trading Bot — Dashboard
 
-> [!info] 🤖 Bot is ACTIVE — last run 2026-11-12 at 15:43: **HOLD**
+> [!info] 🤖 Bot is ACTIVE — last run 2026-11-12 at 15:49: **HOLD**
 > No rebalance due (signal of 2026-10-30 already acted on).
 > Next scheduled rebalance: **2026-12-01** (first trading day of the month). Every other weekday it checks prices and risk, and writes a journal.
 
@@ -25,10 +25,10 @@ tags:
 
 | | |
 |---|---|
-| Equity | 9,949 |
+| Equity | 9,951 |
 | Started with | 10,000 |
 | Return since start | -0.5% |
-| Peak | 9,949 |
+| Peak | 9,951 |
 | Drawdown | +0.0% (halt at -25%) |
 
 ## Holdings now
@@ -50,6 +50,7 @@ pie showData title What the bot holds now
 
 | Date | Status | Equity |
 |---|---|---|
+| [[2026-11-12]] | HOLD | 9,951 |
 | [[2026-11-12]] | HOLD | 9,949 |
 | [[2026-11-12]] | HOLD | 9,990 |
 | [[2026-11-12]] | TRADED | 9,990 |
@@ -59,6 +60,7 @@ pie showData title What the bot holds now
 - [[06 - One-Month Trial]] — **live paper trial vs the S&P 500**
 - [[07 - Trade Log]] — every buy and sell
 - [[08 - Last 12 Months Replay]] — every trade it would have made in the past year
+- [[09 - Upgrades Tested]] — ideas tested to make it smarter, and why most were rejected
 - [[01 - How the Bot Works]] — the rules, in plain words
 - [[02 - Risk Limits]] — **edit this to change the bot's settings**
 - [[03 - Backtest Report]] — 1997–2026 evidence incl. every crash
