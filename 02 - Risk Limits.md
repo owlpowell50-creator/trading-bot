@@ -12,7 +12,7 @@ region: us                   # us = US ETFs (VOO, IEF...) if the US taxes you | 
 account_type: taxable        # us only, for the report: taxable | ira  (run it in an IRA/Roth if you can)
 us_short_term_rate: 0.29     # your federal + state rate on short-term gains and interest
 us_long_term_rate: 0.20      # your federal + state rate on long-term gains and qualified dividends
-mode: paper                  # paper | alpaca-paper | alpaca-live | ibkr-paper | ibkr-live
+mode: alpaca-paper                  # paper | alpaca-paper | alpaca-live | ibkr-paper | ibkr-live
 strategy: CORE               # CORE (recommended) | GEM | TREND | SPY-TREND | 60/40 | SPY
 capital: 10000               # starting PAPER capital
 worst_month_loss: 0.15       # the 1-in-100 bad month you can live with -> vol cap (0.15 = 22%, riskier; 0.08 = 11.9% default)
