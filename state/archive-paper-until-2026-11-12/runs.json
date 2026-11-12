@@ -1,0 +1,26 @@
+{
+ "runs": [
+  {
+   "date": "2026-11-12",
+   "status": "TRADED",
+   "equity": 9990.0
+  },
+  {
+   "date": "2026-11-12",
+   "status": "HOLD",
+   "equity": 9990.0
+  },
+  {
+   "date": "2026-11-12",
+   "status": "HOLD",
+   "equity": 9948.559379920178
+  },
+  {
+   "date": "2026-11-12",
+   "status": "HOLD",
+   "equity": 9950.624210342354
+  }
+ ],
+ "last_signal": "2026-10-30",
+ "halted": false
+}

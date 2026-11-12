@@ -1,25 +1,25 @@
 {
  "start": "2026-11-12",
  "end": "2026-12-12",
- "start_equity": 10000,
- "spy_start_level": 7589.769230266935,
- "spy_start_date": "2026-11-11",
+ "start_equity": 100000.0,
+ "spy_start_level": 7599.163979773437,
+ "spy_start_date": "2026-11-12",
  "settings": {
   "strategy": "CORE",
   "worst_month_loss": 0.15,
   "max_single_asset": 0.8,
   "max_drawdown_halt": 0.25,
   "region": "us",
-  "mode": "paper"
+  "mode": "alpaca-paper"
  },
  "vol_cap": 0.22339434319461013,
  "days": [
   {
    "date": "2026-11-12",
    "data_through": "2026-11-12",
-   "equity": 9950.62,
-   "bot": -0.004937578965764633,
-   "spy": -0.002092594849428586
+   "equity": 99989.15,
+   "bot": -0.00010848899000004408,
+   "spy": 0.0
   }
  ],
  "finished": false

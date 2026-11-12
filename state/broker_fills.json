@@ -1,0 +1,38 @@
+[
+ {
+  "date": "2026-11-12",
+  "asset": "COMMOD",
+  "side": "BUY",
+  "units": 1280.758601856,
+  "price": 18.31,
+  "value": 23450.68999998336,
+  "status": "filled",
+  "order_id": "849465fd-1094-4a1f-a91e-3a449740aa65",
+  "at": "2026-11-12T16:41:06+00:00",
+  "environment": "ALPACA-PAPER"
+ },
+ {
+  "date": "2026-11-12",
+  "asset": "INTL",
+  "side": "BUY",
+  "units": 380.589696032,
+  "price": 97.05,
+  "value": 36936.2299999056,
+  "status": "filled",
+  "order_id": "1856c75f-86c7-46e8-a083-0bf612b92450",
+  "at": "2026-11-12T16:41:13+00:00",
+  "environment": "ALPACA-PAPER"
+ },
+ {
+  "date": "2026-11-12",
+  "asset": "US",
+  "side": "BUY",
+  "units": 55.960412046,
+  "price": 698.941422,
+  "value": 39113.04997113717,
+  "status": "filled",
+  "order_id": "a93fcb6b-fa7d-4811-a0c2-ef8e80a6076e",
+  "at": "2026-11-12T16:41:17+00:00",
+  "environment": "ALPACA-PAPER"
+ }
+]
