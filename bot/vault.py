@@ -325,7 +325,7 @@ def write_trial(t: dict):
     st = t["settings"]
     L = [FM.format(type="trial", updated=last["date"] if last else t["start"], extra_tags="\n  - paper-trial"),
          "# 06 - One-Month Paper Trial", "",
-         f"**{t['start']} → {t['end']}** · paper capital {money(t['start_equity'])} · "
+         f"**{t['start']} → {t['end']}** · account `{st.get('mode', 'paper')}` starting at {money(t['start_equity'])} · "
          f"settings: worst month {st['worst_month_loss']:.0%} (vol cap {t['vol_cap']:.1%}), "
          f"max {st['max_single_asset']:.0%} per ETF, region `{st['region']}`", ""]
     if last:

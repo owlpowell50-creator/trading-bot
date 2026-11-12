@@ -123,6 +123,8 @@ def cmd_daily(args):
         run["start_capital"] = state.get("start_capital") or sum(values.values())
         state["start_capital"] = run["start_capital"]
     equity = sum(values.values())
+    if not args.dry_run:
+        maybe_start_new_trial(cfg, today, equity, s, state)
     hist_eq = record_equity(today, equity) if not args.dry_run else \
         sorted([h for h in equity_history() if h[0] != today] + [(today, equity)])
     base = state.get("halt_baseline_date")      # set by `resume`: peak is measured from here
@@ -174,6 +176,9 @@ def cmd_daily(args):
                 else:
                     run["fills"] = broker.execute(orders, today)
                     values = broker.values()
+                    bf = STATE / "broker_fills.json"
+                    old = json.loads(bf.read_text()) if bf.exists() else []
+                    bf.write_text(json.dumps(old + run["fills"], indent=1))
                 status = "TRADED"
                 headline = f"Rebalanced on the {sig_date} signal: {len(orders)} orders."
             else:
@@ -277,8 +282,12 @@ def replay(cfg, s, months=12):
 
 
 def refresh_extras(cfg, s, today):
-    acct = STATE / "paper_account.json"
-    fills = json.loads(acct.read_text())["fills"] if acct.exists() else []
+    if cfg["mode"] == "paper":
+        acct = STATE / "paper_account.json"
+        fills = json.loads(acct.read_text())["fills"] if acct.exists() else []
+    else:
+        bf = STATE / "broker_fills.json"
+        fills = json.loads(bf.read_text()) if bf.exists() else []
     vault.write_trade_log(fills, cfg["instruments"], today)
     try:
         vault.write_replay(replay(cfg, s), cfg["instruments"])
@@ -319,6 +328,31 @@ def update_trial(today, equity, s):
     vault.write_trial(t)
 
 
+def maybe_start_new_trial(cfg, today, equity, s, state):
+    """When `mode` changes (e.g. paper -> alpaca-paper), archive the old account's
+    history and start a new 30-day trial on the new account's real balance."""
+    if not TRIAL.exists():
+        return
+    t = json.loads(TRIAL.read_text())
+    if t.get("settings", {}).get("mode", "paper") == cfg["mode"]:
+        return
+    arch = STATE / f"archive-{t.get('settings', {}).get('mode', 'paper')}-until-{today}"
+    arch.mkdir(parents=True, exist_ok=True)
+    for f in ("trial.json", "equity.csv", "runs.json"):
+        if (STATE / f).exists():
+            (STATE / f).replace(arch / f)
+    state.clear()
+    state.update({"runs": [], "last_signal": None, "halted": False, "start_capital": equity})
+    from datetime import date as _d, timedelta
+    TRIAL.write_text(json.dumps({
+        "start": today, "end": (_d.fromisoformat(today) + timedelta(days=30)).isoformat(),
+        "start_equity": equity, "spy_start_level": s.levels["US"][-1], "spy_start_date": s.dates[-1],
+        "settings": {k: cfg[k] for k in ("strategy", "worst_month_loss", "max_single_asset",
+                                         "max_drawdown_halt", "region", "mode")},
+        "vol_cap": cfg["vol_cap"], "days": []}, indent=1))
+    print(f"New account mode {cfg['mode']}: started a fresh trial with {equity:,.2f}")
+
+
 def cmd_start_trial(args):
     """Fresh paper account, riskier settings already in '02 - Risk Limits', first trade today."""
     cfg = cfgmod.load()
@@ -336,7 +370,7 @@ def cmd_start_trial(args):
     TRIAL.write_text(json.dumps({"start": today, "end": end, "start_equity": cfg["capital"],
                                  "spy_start_level": s.levels["US"][-1], "spy_start_date": s.dates[-1],
                                  "settings": {k: cfg[k] for k in ("strategy", "worst_month_loss", "max_single_asset",
-                                                                  "max_drawdown_halt", "region")},
+                                                                  "max_drawdown_halt", "region", "mode")},
                                  "vol_cap": cfg["vol_cap"], "days": []}, indent=1))
     print(f"Trial {today} -> {end} with {cfg['capital']:,.0f} paper. Previous account archived in {arch.name}/")
     args.no_download = getattr(args, "no_download", False)
