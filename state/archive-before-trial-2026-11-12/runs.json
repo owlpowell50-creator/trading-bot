@@ -1,0 +1,11 @@
+{
+ "runs": [
+  {
+   "date": "2026-11-12",
+   "status": "TRADED",
+   "equity": 9990.0
+  }
+ ],
+ "last_signal": "2026-10-30",
+ "halted": false
+}

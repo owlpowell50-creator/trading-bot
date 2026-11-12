@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+logs/
+data/series_cache.json
+.DS_Store
+*.tmp

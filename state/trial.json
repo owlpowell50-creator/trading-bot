@@ -1,0 +1,25 @@
+{
+ "start": "2026-11-12",
+ "end": "2026-12-12",
+ "start_equity": 10000,
+ "spy_start_level": 7589.769230266935,
+ "spy_start_date": "2026-11-11",
+ "settings": {
+  "strategy": "CORE",
+  "worst_month_loss": 0.15,
+  "max_single_asset": 0.8,
+  "max_drawdown_halt": 0.25,
+  "region": "us"
+ },
+ "vol_cap": 0.22339434319461013,
+ "days": [
+  {
+   "date": "2026-11-12",
+   "data_through": "2026-11-11",
+   "equity": 9990.0,
+   "bot": -0.0010000000000000009,
+   "spy": 0.0
+  }
+ ],
+ "finished": false
+}
