@@ -213,7 +213,27 @@ def cmd_daily(args):
     for pr in run["problems"]:
         print("  !", pr)
     print(f"Journal: {p}")
-    return 1 if status in ("BLOCKED",) else 0
+    if status in ("TRADED", "BLOCKED", "HALTED") or run["problems"]:
+        write_alert(status if status != "HOLD" else "WARNING", headline, run, p)
+    return 1 if status in ("BLOCKED", "HALTED") else 0
+
+
+def write_alert(status, headline, run, journal_path):
+    """state/alert.md -> the GitHub workflow turns it into an Issue, which GitHub
+    emails / pushes to your phone. Not committed (see .gitignore)."""
+    icon = {"TRADED": "🟢", "BLOCKED": "🔴", "HALTED": "🛑", "WARNING": "⚠️"}.get(status, "ℹ️")
+    lines = [f"{icon} **{status}** — {headline}", "",
+             f"Equity {run['equity']:,.0f} · drawdown {run['drawdown']:.1%} · data through {run['data_through']}", ""]
+    if run.get("orders"):
+        lines += ["| Side | ETF | Value |", "|---|---|---|"]
+        for o in run["orders"]:
+            lines.append(f"| {o['side']} | {run['instruments'][o['asset']]['symbol']} | {o['value']:,.0f} |")
+        lines.append("")
+    for pr in run.get("problems", []):
+        lines.append(f"- ⚠️ {pr}")
+    lines += ["", f"Full journal: `{Path(journal_path).name}`"]
+    (STATE / "alert.md").write_text("\n".join(lines))
+    (STATE / "alert_title.txt").write_text(f"{icon} Bot {status} {run['date']}: {headline[:80]}")
 
 
 TRIAL = STATE / "trial.json"

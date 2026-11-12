@@ -257,9 +257,17 @@ class USTax:
         return self.year_end()
 
 
+def crash_brake_hit(s: Series, asset: str, i: int, n: int) -> bool:
+    lv = s.levels[asset]
+    if i - n < 0 or lv[i - n] is None:
+        return False
+    avg = sum(lv[k] for k in range(i - n + 1, i + 1)) / n
+    return lv[i] < avg
+
+
 def run(s: Series, strat: Strategy, start: str = "1997-06-01", end: Optional[str] = None,
         cost_bps: float = 10.0, min_trade: float = 0.02, capital: float = 1.0,
-        tax: Optional["ItalianTax"] = None, band: float = 0.0) -> Result:
+        tax: Optional["ItalianTax"] = None, band: float = 0.0, brake: int = 0) -> Result:
     me = MonthEnds(s)
     month_ends = set(me.me)
     n = len(s.dates)
@@ -324,6 +332,14 @@ def run(s: Series, strat: Strategy, start: str = "1997-06-01", end: Optional[str
                     w = {a: x for a, x in pending.items() if x > 1e-9}
                     wlog.append((d, dict(w)))
                 pending = None
+        # 2b) crash brake: a held risky asset that closes below its `brake`-day average
+        #     is sold to cash tomorrow; it can only come back at the next month-end
+        if brake and started and pending is None and i not in month_ends:
+            hit = [a for a, x in w.items() if a != "CASH" and x > 0.001 and crash_brake_hit(s, a, i, brake)]
+            if hit:
+                pending = {a: x for a, x in w.items() if a not in hit}
+                pending["CASH"] = pending.get("CASH", 0.0) + sum(w[a] for a in hit)
+                pending_from = i
         # 3) on a month-end, compute tomorrow's target from today's close
         if i in month_ends:
             tgt = strat.target(s, me, i)

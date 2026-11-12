@@ -177,6 +177,7 @@ def write_dashboard(run: dict, history: List[tuple], recent: List[dict]):
               "- [[06 - One-Month Trial]] — **live paper trial vs the S&P 500**",
               "- [[07 - Trade Log]] — every buy and sell",
               "- [[08 - Last 12 Months Replay]] — every trade it would have made in the past year",
+              "- [[09 - Upgrades Tested]] — ideas tested to make it smarter, and why most were rejected",
               "- [[01 - How the Bot Works]] — the rules, in plain words",
               "- [[02 - Risk Limits]] — **edit this to change the bot's settings**",
               "- [[03 - Backtest Report]] — 1997–2026 evidence incl. every crash",

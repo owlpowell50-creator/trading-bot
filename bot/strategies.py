@@ -234,6 +234,35 @@ class Core(Strategy):
         return w
 
 
+class Ensemble(Strategy):
+    """Average of several CORE variants (lookbacks x number of picks). Instead of
+    betting that one setting is right, hold the average opinion of 12 - this
+    is the main defence against having picked a lucky setting."""
+    name = "ENSEMBLE"
+    description = "Average of 12 CORE variants (4 lookback sets x top 2/3/4)"
+
+    def __init__(self, vol_cap: float = 0.119, max_weight: float = 0.60):
+        self.members = [Core(top_k=k, vol_cap=vol_cap, lookbacks=lb, max_weight=max_weight)
+                        for k in (2, 3, 4) for lb in ((1, 3, 6), (3, 6, 12), (6, 12), (12,))]
+        self.universe = self.members[0].universe
+        self.max_weight = max_weight
+
+    def target(self, s, me, i):
+        ws = [m.target(s, me, i) for m in self.members]
+        if any(w is None for w in ws):
+            return None
+        out: Dict[str, float] = {}
+        for w in ws:
+            for a, x in w.items():
+                out[a] = out.get(a, 0.0) + x / len(ws)
+        risky = {a: min(x, self.max_weight) for a, x in out.items() if a != "CASH"}
+        risky["CASH"] = max(0.0, 1.0 - sum(risky.values()))
+        return risky
+
+    def scores(self, s, me, i):
+        return self.members[4].scores(s, me, i)   # the (3,6,12) top-3 member, for the journal
+
+
 class SpyTrend(Strategy):
     name = "SPY-TREND"
     description = "S&P 500 while it is above its 10-month average, otherwise Treasuries (Faber 2007 / Zweig)"
@@ -262,6 +291,7 @@ def default_strategies(vol_cap: float = 0.119, max_weight: float = 0.60):
         BuyHold({"US": 0.6, "BONDS": 0.4}, "60/40"),
         BuyHold({"US": 1.0}, "SPY"),
         SpyTrend(),
+        Ensemble(vol_cap=vol_cap, max_weight=max_weight),
     ]
 
 

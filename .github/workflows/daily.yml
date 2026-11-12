@@ -9,6 +9,7 @@ on:
     paths: [".github/workflows/**"]   # runs once when this schedule file changes (setup test)
 permissions:
   contents: write              # lets the run save the updated notes back to the repo
+  issues: write                # trade / problem alerts arrive as Issues -> email + GitHub app push
 concurrency:
   group: trading-bot           # never two runs at once
   cancel-in-progress: false
@@ -24,10 +25,25 @@ jobs:
       - name: Self-tests
         run: python run.py test
       - name: Daily run (download prices, check, trade if due, write notes)
+        id: bot
         env:
           APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}         # only used in alpaca modes
           APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
-        run: python run.py daily || echo "run reported a problem - see the journal note"
+        run: |
+          set +e
+          python run.py daily
+          code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          if [ $code -ge 2 ]; then
+            printf '🔴 **The bot crashed.** Open the Actions tab for the error log.\n' > state/alert.md
+            echo "🔴 Bot crashed $(date -u +%Y-%m-%d)" > state/alert_title.txt
+          fi
+          exit 0
+      - name: Send alert (trade or problem)
+        if: hashFiles('state/alert.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue create --title "$(cat state/alert_title.txt)" --body-file state/alert.md
       - name: Save notes and account state back to the repo
         run: |
           git config user.name "trading-bot"
@@ -35,3 +51,8 @@ jobs:
           git add -A
           git commit -m "Bot run $(date -u +%Y-%m-%d)" || echo "nothing changed"
           git push
+      - name: Mark the run red if it was blocked, halted or crashed
+        if: steps.bot.outputs.code != '0'
+        run: |
+          echo "Bot exit code ${{ steps.bot.outputs.code }} - see the journal / alert issue"
+          exit 1
