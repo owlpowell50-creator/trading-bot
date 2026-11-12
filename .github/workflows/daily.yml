@@ -1,4 +1,4 @@
-# Runs the trading bot on GitHub's servers every weekday, even when your Mac is off. (Alpaca paper since 2026-11-12)
+# Runs the trading bot on GitHub's servers every weekday, even when your Mac is off. (Alpaca paper since 2026-11-12, keys added)
 # 15:05 UTC = 10:05 New York in winter (11:05 in summer) - after the US market opens.
 name: Trading bot daily run
 on:
