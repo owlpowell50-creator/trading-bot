@@ -17,14 +17,14 @@ tags:
 
 **2026-11-12 → 2026-12-12** · paper capital 10,000 · settings: worst month 15% (vol cap 22.3%), max 80% per ETF, region `us`
 
-> [!warning] Day 1: bot -0.1% vs S&P 500 +0.0%
-> Equity 9,990 · behind by 0.1 points (prices through 2026-11-11)
+> [!warning] Day 1: bot -0.5% vs S&P 500 -0.2%
+> Equity 9,949 · behind by 0.3 points (prices through 2026-11-12)
 
 ## Daily log
 
 | Run | Prices through | Equity | Bot | S&P 500 | Difference |
 |---|---|---|---|---|---|
-| [[2026-11-12]] | 2026-11-11 | 9,990 | -0.1% | +0.0% | -0.1% |
+| [[2026-11-12]] | 2026-11-12 | 9,949 | -0.5% | -0.2% | -0.3% |
 
 ## How to read this
 

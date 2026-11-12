@@ -15,41 +15,42 @@ tags:
 
 # Trading Bot — Dashboard
 
-> [!info] 🤖 Bot is ACTIVE — last run 2026-11-12 at 15:23: **HOLD**
+> [!info] 🤖 Bot is ACTIVE — last run 2026-11-12 at 15:43: **HOLD**
 > No rebalance due (signal of 2026-10-30 already acted on).
 > Next scheduled rebalance: **2026-12-01** (first trading day of the month). Every other weekday it checks prices and risk, and writes a journal.
 
-**Mode:** `paper` · **Region:** `us` · **Strategy:** `CORE` · **Data through:** 2026-11-11
+**Mode:** `paper` · **Region:** `us` · **Strategy:** `CORE` · **Data through:** 2026-11-12
 
 ## Account
 
 | | |
 |---|---|
-| Equity | 9,990 |
+| Equity | 9,949 |
 | Started with | 10,000 |
-| Return since start | -0.1% |
-| Peak | 9,990 |
+| Return since start | -0.5% |
+| Peak | 9,949 |
 | Drawdown | +0.0% (halt at -25%) |
 
 ## Holdings now
 
 | Asset | Weight | Instrument |
 |---|---|---|
-| US stocks (S&P 500) | 39.3% | VOO (US-listed) |
+| US stocks (S&P 500) | 39.4% | VOO (US-listed) |
 | Developed ex-US stocks | 37.1% | IEFA (US-listed) |
-| Commodities | 23.6% | PDBC (US-listed) |
+| Commodities | 23.5% | PDBC (US-listed) |
 
 ```mermaid
 pie showData title What the bot holds now
-    "US stocks (S&P 500) (VOO)" : 39.3
+    "US stocks (S&P 500) (VOO)" : 39.4
     "Developed ex-US stocks (IEFA)" : 37.1
-    "Commodities (PDBC)" : 23.6
+    "Commodities (PDBC)" : 23.5
 ```
 
 ## Recent runs
 
 | Date | Status | Equity |
 |---|---|---|
+| [[2026-11-12]] | HOLD | 9,949 |
 | [[2026-11-12]] | HOLD | 9,990 |
 | [[2026-11-12]] | TRADED | 9,990 |
 
