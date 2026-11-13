@@ -4,6 +4,11 @@
    "date": "2026-11-12",
    "status": "TRADED",
    "equity": 99989.151101
+  },
+  {
+   "date": "2026-11-13",
+   "status": "HOLD",
+   "equity": 99470.61161200001
   }
  ],
  "last_signal": "2026-10-30",

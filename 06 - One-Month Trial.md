@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-12
+updated: 2026-11-13
 tags:
   - type/trial
   - department/trading
@@ -17,14 +17,25 @@ tags:
 
 **2026-11-12 → 2026-12-12** · account `alpaca-paper` starting at 100,000 · settings: worst month 15% (vol cap 22.3%), max 80% per ETF, region `us`
 
-> [!warning] Day 1: bot -0.0% vs S&P 500 +0.0%
-> Equity 99,989 · behind by 0.0 points (prices through 2026-11-12)
+> [!success] Day 2: bot -0.5% vs S&P 500 -1.3%
+> Equity 99,471 · ahead by 0.7 points (prices through 2026-11-13)
 
 ## Daily log
 
 | Run | Prices through | Equity | Bot | S&P 500 | Difference |
 |---|---|---|---|---|---|
 | [[2026-11-12]] | 2026-11-12 | 99,989 | -0.0% | +0.0% | -0.0% |
+| [[2026-11-13]] | 2026-11-13 | 99,471 | -0.5% | -1.3% | +0.7% |
+
+```mermaid
+xychart-beta
+    title "Return since start (%)"
+    x-axis ["11-12", "11-13"]
+    y-axis "%" -1 --> 0
+    line [-0.0, -0.5]
+    line [0.0, -1.3]
+```
+*Lines: first = **Bot** · second = **S&P 500***
 
 ## How to read this
 

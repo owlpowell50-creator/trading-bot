@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-12
+updated: 2026-11-13
 tags:
   - type/dashboard
   - department/trading
@@ -15,36 +15,36 @@ tags:
 
 # Trading Bot — Dashboard
 
-> [!success] 🤖 Bot is ACTIVE — last run 2026-11-12 at 16:40: **TRADED**
-> Rebalanced on the 2026-10-30 signal: 4 orders.
+> [!info] 🤖 Bot is ACTIVE — last run 2026-11-13 at 15:51: **HOLD**
+> No rebalance due (signal of 2026-10-30 already acted on).
 > Next scheduled rebalance: **2026-12-01** (first trading day of the month). Every other weekday it checks prices and risk, and writes a journal.
 
-**Mode:** `alpaca-paper` · **Region:** `us` · **Strategy:** `CORE` · **Data through:** 2026-11-12
+**Mode:** `alpaca-paper` · **Region:** `us` · **Strategy:** `CORE` · **Data through:** 2026-11-13
 
 ## Account
 
 | | |
 |---|---|
-| Equity | 99,989 |
+| Equity | 99,471 |
 | Started with | 100,000 |
-| Return since start | -0.0% |
-| Peak | 100,000 |
-| Drawdown | +0.0% (halt at -25%) |
+| Return since start | -0.5% |
+| Peak | 99,989 |
+| Drawdown | -0.5% (halt at -25%) |
 
 ## Holdings now
 
 | Asset | Weight | Instrument |
 |---|---|---|
-| US stocks (S&P 500) | 39.1% | VOO (US-listed) |
-| Developed ex-US stocks | 36.9% | IEFA (US-listed) |
-| Commodities | 23.4% | PDBC (US-listed) |
+| US stocks (S&P 500) | 38.8% | VOO (US-listed) |
+| Developed ex-US stocks | 37.0% | IEFA (US-listed) |
+| Commodities | 23.7% | PDBC (US-listed) |
 | Cash (T-bills) | 0.5% | SGOV (US-listed) |
 
 ```mermaid
 pie showData title What the bot holds now
-    "US stocks (S&P 500) (VOO)" : 39.1
-    "Developed ex-US stocks (IEFA)" : 36.9
-    "Commodities (PDBC)" : 23.4
+    "US stocks (S&P 500) (VOO)" : 38.8
+    "Developed ex-US stocks (IEFA)" : 37.0
+    "Commodities (PDBC)" : 23.7
     "Cash (T-bills) (SGOV)" : 0.5
 ```
 
@@ -52,7 +52,17 @@ pie showData title What the bot holds now
 
 | Date | Status | Equity |
 |---|---|---|
+| [[2026-11-13]] | HOLD | 99,471 |
 | [[2026-11-12]] | TRADED | 99,989 |
+
+## Equity
+```mermaid
+xychart-beta
+    title "Paper account value"
+    x-axis ["11-12", "11-13"]
+    y-axis "Value" 99419 --> 100041
+    line [99989.1, 99470.6]
+```
 
 ## Notes
 
