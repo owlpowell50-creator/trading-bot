@@ -119,6 +119,8 @@ def write_live_account(snap: dict, instruments: Dict[str, dict], start_capital: 
     a = snap["account"]
     equity, last = _f(a.get("equity")), _f(a.get("last_equity"))
     rows = equity_series(snap, start_capital, local_equity)
+    if equity and (not rows or rows[-1][0] < today):
+        rows.append((today, equity))            # Alpaca's history stops at the last close
     st = stats(rows, start_capital)
     real = realized_pnl(snap["orders"])
     unreal = sum(_f(p["unrealized_pl"]) for p in snap["positions"])
