@@ -4,7 +4,7 @@ import gzip, json, os, time, urllib.request
 from datetime import date, datetime, timezone
 
 UA_SEC = os.environ.get("SEC_USER_AGENT") or "TradingBotResearch admin@tradingbot-research.example"
-UA_WEB = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
+UA_WEB = "Mozilla/5.0"
 
 PRICES = {   # ticker: (start, end, interval)
     "META": ("2022-01-20", "2022-02-15", "1d"),
@@ -88,10 +88,10 @@ def main():
     out = {"prices": {}, "monthly": {}, "sec": {}, "fetched": datetime.now(timezone.utc).isoformat()}
     for t, (a, b, iv) in PRICES.items():
         out["prices"][t] = yahoo(t, a, b, iv)
-        time.sleep(0.5)
+        time.sleep(1.5)
     for t in MONTHLY:
         out["monthly"][t] = yahoo(t, "2016-01-01", date.today().isoformat(), "1mo")
-        time.sleep(0.5)
+        time.sleep(1.5)
     tick = get("https://www.sec.gov/files/company_tickers.json", UA_SEC)
     m = {v["ticker"]: str(v["cik_str"]).zfill(10) for v in tick.values()} if "error" not in tick else {}
     for t in SEC_TICKERS:
