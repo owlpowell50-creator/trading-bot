@@ -1,0 +1,25 @@
+# One-off: real market + SEC data for the vault's case notes.
+name: Case data
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Fetch
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+        run: python tools/case_data.py
+      - name: Save to the case-data branch
+        run: |
+          mkdir /tmp/out && cp case_data.json.gz /tmp/out/
+          cd /tmp/out && git init -q -b case-data && git add . \
+            && git -c user.name=trading-bot -c user.email=trading-bot@users.noreply.github.com commit -qm "case data" \
+            && git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" case-data
