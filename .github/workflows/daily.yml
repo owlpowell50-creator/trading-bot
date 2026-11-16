@@ -4,6 +4,7 @@ name: Trading bot daily run
 on:
   schedule:
     - cron: "5 15 * * 1-5"
+    - cron: "35 18 * * 1-5"     # backup: GitHub sometimes skips a scheduled run (it missed 2026-11-14)
   workflow_dispatch: {}        # "Run workflow" button for a manual run
   push:
     paths: [".github/workflows/**"]   # runs once when this schedule file changes (setup test)
@@ -22,9 +23,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Skip if today's run already happened (backup schedule)
+        id: gate
+        run: |
+          last=$(python -c "import json;print(json.load(open('state/last_run.json'))['date'])" 2>/dev/null || echo none)
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$last" = "$(date -u +%F)" ]; then
+            echo "skip=1" >> "$GITHUB_OUTPUT"; echo "Already ran today - nothing to do."
+          fi
       - name: Self-tests
+        if: steps.gate.outputs.skip != '1'
         run: python run.py test
       - name: Daily run (download prices, check, trade if due, write notes)
+        if: steps.gate.outputs.skip != '1'
         id: bot
         env:
           APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}         # only used in alpaca modes
@@ -45,6 +55,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh issue create --title "$(cat state/alert_title.txt)" --body-file state/alert.md
       - name: Save notes and account state back to the repo
+        if: steps.gate.outputs.skip != '1'
         run: |
           git config user.name "trading-bot"
           git config user.email "trading-bot@users.noreply.github.com"
@@ -52,7 +63,7 @@ jobs:
           git commit -m "Bot run $(date -u +%Y-%m-%d)" || echo "nothing changed"
           git push
       - name: Mark the run red if it was blocked, halted or crashed
-        if: steps.bot.outputs.code != '0'
+        if: steps.gate.outputs.skip != '1' && steps.bot.outputs.code != '0'
         run: |
           echo "Bot exit code ${{ steps.bot.outputs.code }} - see the journal / alert issue"
           exit 1

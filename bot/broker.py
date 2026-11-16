@@ -228,6 +228,14 @@ class AlpacaBroker:
     def positions(self) -> Dict[str, dict]:
         return {p["symbol"]: p for p in self.http("GET", "/v2/positions")}
 
+    def data_http(self, method: str, path: str, body: Optional[dict] = None):
+        """Same keys, market-data host (bars, quotes)."""
+        old, self.base = self.base, "https://data.alpaca.markets"
+        try:
+            return self._http(method, path, body)
+        finally:
+            self.base = old
+
     def values(self) -> Dict[str, float]:
         out: Dict[str, float] = {}
         for sym, p in self.positions().items():

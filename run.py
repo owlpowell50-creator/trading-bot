@@ -214,6 +214,8 @@ def cmd_daily(args):
     vault.write_dashboard(run, hist_eq, state["runs"])
     (STATE / "last_run.json").write_text(json.dumps(run, default=str))
     refresh_extras(cfg, s, today)
+    if cfg["mode"].startswith("alpaca"):
+        live_notes(cfg, broker, today, run)
     print(f"{status}: {headline}")
     for pr in run["problems"]:
         print("  !", pr)
@@ -281,6 +283,23 @@ def replay(cfg, s, months=12):
             "bot_dd": mdd(bot), "spy_dd": mdd(spyc), "months": months_out}
 
 
+def live_notes(cfg, broker, today, run):
+    """Real Alpaca account note + day-trading simulator on real intraday bars.
+    Never allowed to break the daily run."""
+    from bot import live, daytrade
+    try:
+        snap = live.snapshot(broker)
+        live.write_live_account(snap, cfg["instruments"], run["start_capital"], equity_history(), today)
+    except Exception as e:  # noqa: BLE001
+        run.setdefault("problems", [])
+        print("live account note skipped:", e)
+    try:
+        st = daytrade.run(broker.data_http, today)
+        daytrade.write_note(st, today)
+    except Exception as e:  # noqa: BLE001
+        print("day-trading simulator skipped:", e)
+
+
 def refresh_extras(cfg, s, today):
     if cfg["mode"] == "paper":
         acct = STATE / "paper_account.json"
@@ -306,7 +325,14 @@ def cmd_notes(args):
     if TRIAL.exists():
         vault.write_trial(json.loads(TRIAL.read_text()))
     refresh_extras(cfg, s, (json.loads(lr.read_text())["date"] if lr.exists() else date.today().isoformat()))
-    print("Notes rebuilt: 00 Dashboard, 06 Trial, 07 Trade Log, 08 Replay")
+    from bot import live, daytrade
+    if live.SNAP.exists():
+        lrun = json.loads(lr.read_text()) if lr.exists() else {"start_capital": 100000.0}
+        live.write_live_account(json.loads(live.SNAP.read_text()), cfg["instruments"],
+                                lrun.get("start_capital", 100000.0), equity_history(), lrun.get("date", ""))
+    if daytrade.STATE.exists():
+        daytrade.write_note(daytrade.load(), date.today().isoformat())
+    print("Notes rebuilt: 00 Dashboard, 06 Trial, 07 Trade Log, 08 Replay, 10 Live Account, 11 Day Trading")
     return 0
 
 

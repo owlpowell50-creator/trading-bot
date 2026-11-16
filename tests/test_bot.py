@@ -228,5 +228,55 @@ class Config(unittest.TestCase):
         shutil.rmtree(tmp.parent)
 
 
+class LiveAndDayTrade(unittest.TestCase):
+    """Real-account note and intraday simulator logic (fake broker responses)."""
+
+    def _bars(self, path):
+        from datetime import datetime, timedelta, timezone
+        out, t0 = [], datetime(2026, 11, 10, 14, 30, tzinfo=timezone.utc)   # 09:30 New York
+        for i, (o, h, l, c) in enumerate(path):
+            out.append({"t": (t0 + timedelta(minutes=5 * i)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "o": o, "h": h, "l": l, "c": c, "v": 1000})
+        return out
+
+    def test_orb_long_hits_target(self):
+        from bot import daytrade as dt
+        path = [(100, 101, 99, 100)] * 3                      # range 99-101
+        path += [(100.5, 101.5, 100.4, 101.2)]                # 09:45 closes above 101 -> signal
+        path += [(101.3, 101.6, 101.1, 101.5)]                # entry at 101.3 open
+        path += [(101.5, 104.5, 101.4, 104.2)]                # target 101.31+3 = 104.31 hit
+        path += [(104, 104.1, 103.9, 104)] * 70
+        days = dt.session_bars(self._bars(path))
+        bars = list(days.values())[0]
+        tr = dt.simulate_day("SPY", bars, 25000, 1.0)
+        self.assertEqual(tr["side"], "LONG")
+        self.assertEqual(tr["reason"], "Target")
+        self.assertAlmostEqual(tr["entry"], 101.3 * 1.0001, places=3)
+        self.assertGreater(tr["pnl"], 0)
+        self.assertLessEqual(tr["shares"] * tr["entry"], 25000 * 0.2 + 1e-6)   # 20% position cap
+
+    def test_orb_same_bar_assumes_stop(self):
+        from bot import daytrade as dt
+        path = [(100, 101, 99, 100)] * 3 + [(100.5, 101.5, 100.4, 101.2), (101.3, 105, 98.5, 100)]
+        path += [(100, 100.1, 99.9, 100)] * 70
+        bars = list(dt.session_bars(self._bars(path)).values())[0]
+        tr = dt.simulate_day("SPY", bars, 25000, 1.0)
+        self.assertEqual(tr["reason"], "Stop")
+        self.assertLess(tr["pnl"], 0)
+
+    def test_orb_no_breakout_no_trade(self):
+        from bot import daytrade as dt
+        path = [(100, 101, 99, 100)] * 78
+        bars = list(dt.session_bars(self._bars(path)).values())[0]
+        self.assertIsNone(dt.simulate_day("SPY", bars, 25000, 1.0))
+
+    def test_realized_pnl_fifo(self):
+        from bot import live
+        orders = [{"symbol": "VOO", "side": "buy", "filled_qty": "10", "filled_avg_price": "100", "filled_at": "1"},
+                  {"symbol": "VOO", "side": "buy", "filled_qty": "10", "filled_avg_price": "110", "filled_at": "2"},
+                  {"symbol": "VOO", "side": "sell", "filled_qty": "15", "filled_avg_price": "120", "filled_at": "3"}]
+        self.assertAlmostEqual(live.realized_pnl(orders)["VOO"], 10 * 20 + 5 * 10)
+
+
 if __name__ == "__main__":
     unittest.main()
