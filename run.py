@@ -505,6 +505,18 @@ def cmd_daytrade_live(args):
     return 0
 
 
+def cmd_daytrade_month(args):
+    from datetime import timedelta
+    from bot import daytrade_live as dl, daytrade_month as dm
+    api = dl.Alpaca()
+    end = args.end or (date.today() - timedelta(days=1)).isoformat()
+    start = args.start or (date.fromisoformat(end) - timedelta(days=30)).isoformat()
+    st = dm.simulate(lambda m, p, b=None: api.call(m, p, b, data=True), start, end, args.capital)
+    dm.write_note(st, date.today().isoformat())
+    print(f"month simulation {start} -> {end}: {len(st['trades'])} trades, equity ${st['equity']:,.2f}")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -528,10 +540,12 @@ def main():
     dl = sub.add_parser("daytrade-live", help="run the live (paper) opening-range day-trader")
     dl.add_argument("--until", default="15:57"); dl.add_argument("--flatten"); dl.add_argument("--gate", action="store_true")
     dl.add_argument("--report", action="store_true"); dl.add_argument("--check", action="store_true")
+    dm = sub.add_parser("daytrade-month", help="simulate one month of the live day-trader on real 5-minute bars")
+    dm.add_argument("--start"); dm.add_argument("--end"); dm.add_argument("--capital", type=float, default=100000.0)
     args = ap.parse_args()
     fn = {"daily": cmd_daily, "signal": cmd_signal, "backtest": cmd_backtest, "update-data": cmd_update,
           "status": cmd_status, "resume": cmd_resume, "test": cmd_test,
-          "start-trial": cmd_start_trial, "notes": cmd_notes, "daytrade-live": cmd_daytrade_live}[args.cmd]
+          "start-trial": cmd_start_trial, "notes": cmd_notes, "daytrade-live": cmd_daytrade_live, "daytrade-month": cmd_daytrade_month}[args.cmd]
     try:
         return fn(args)
     except Exception:  # noqa: BLE001

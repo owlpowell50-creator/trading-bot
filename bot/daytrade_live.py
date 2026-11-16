@@ -275,7 +275,13 @@ def write_note(st, today):
          f"| **Equity** | **${eq:,.2f}** ({(eq / s0 - 1) * 100:+.2f}%) |" if eq else "| Equity | — |",
          f"| Trades | {len(tr)} ({len(wins)} winners) |",
          f"| Average R | {sum(rs) / len(rs):+.2f} |" if rs else "| Average R | — |", "",
-         "## Ledger", ""]
+         "## One-month trial", ""]
+    if st.get("start"):
+        s0d = date.fromisoformat(st["start"]); endd = s0d + timedelta(days=30); today_d = date.fromisoformat(today)
+        L += ["| | |", "|---|---|", f"| Trial | {s0d} → {endd} (day {min(30, (today_d - s0d).days + 1)} of 30) |",
+              f"| Result so far | {(eq / s0 - 1) * 100:+.2f}% |" if eq else "| Result so far | — |",
+              "| Expectation | see [[13 - Day Trading Month Simulation]] — the same rules on the previous month of real data |", ""]
+    L += ["## Ledger", ""]
     if not tr:
         L.append("No trades yet.")
     else:
