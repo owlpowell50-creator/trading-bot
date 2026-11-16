@@ -8,7 +8,7 @@ on:
         required: false
         default: ""
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: sec-data
   cancel-in-progress: false
@@ -27,6 +27,14 @@ jobs:
         run: |
           if [ -n "${{ github.event.inputs.limit }}" ]; then L="--limit ${{ github.event.inputs.limit }}"; fi
           python tools/sec_fundamentals.py tools/ciks.tsv sec_fundamentals.jsonl.gz $L
+      - name: Save to the sec-data branch (kept off main so it never syncs into Obsidian)
+        if: always()
+        run: |
+          [ -f sec_fundamentals.jsonl.gz ] || exit 0
+          mkdir /tmp/out && cp sec_fundamentals.jsonl.gz /tmp/out/
+          cd /tmp/out && git init -q -b sec-data && git add . \
+            && git -c user.name=trading-bot -c user.email=trading-bot@users.noreply.github.com commit -qm "SEC data $(date -u +%F)" \
+            && git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" sec-data
       - uses: actions/upload-artifact@v4
         if: always()
         with:
