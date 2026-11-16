@@ -7,7 +7,7 @@ on:
     - cron: "35 18 * * 1-5"     # backup: GitHub sometimes skips a scheduled run (it missed 2026-11-14)
   workflow_dispatch: {}        # "Run workflow" button for a manual run
   push:
-    paths: [".github/workflows/**"]   # runs once when this schedule file changes (setup test)
+    paths: [".github/workflows/daily.yml"]   # runs once when this schedule file changes (setup test)
 permissions:
   contents: write              # lets the run save the updated notes back to the repo
   issues: write                # trade / problem alerts arrive as Issues -> email + GitHub app push
@@ -23,11 +23,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Skip if today's run already happened (backup schedule)
+      - name: Skip if today's run already happened (backup schedule / setup pushes)
         id: gate
         run: |
           last=$(python -c "import json;print(json.load(open('state/last_run.json'))['date'])" 2>/dev/null || echo none)
-          if [ "${{ github.event_name }}" = "schedule" ] && [ "$last" = "$(date -u +%F)" ]; then
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ] && [ "$last" = "$(date -u +%F)" ]; then
             echo "skip=1" >> "$GITHUB_OUTPUT"; echo "Already ran today - nothing to do."
           fi
       - name: Self-tests

@@ -1,0 +1,32 @@
+# One-off / occasional: download real SEC financials for every company page in the vault.
+name: SEC company data
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Only the first N companies (blank = all)"
+        required: false
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: sec-data
+  cancel-in-progress: false
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Download from SEC EDGAR
+        run: |
+          if [ -n "${{ github.event.inputs.limit }}" ]; then L="--limit ${{ github.event.inputs.limit }}"; fi
+          python tools/sec_fundamentals.py tools/ciks.tsv sec_fundamentals.jsonl.gz $L
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sec-fundamentals
+          path: sec_fundamentals.jsonl.gz
+          retention-days: 30
