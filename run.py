@@ -17,6 +17,7 @@ Settings: edit the YAML block at the top of "02 - Risk Limits.md".
 from __future__ import annotations
 
 import argparse
+import os
 import csv
 import json
 import sys
@@ -490,6 +491,18 @@ def cmd_test(args):
     return 0 if r.wasSuccessful() else 1
 
 
+def cmd_daytrade_live(args):
+    from bot import daytrade_live as dl
+    active = dl.run(args.until, args.flatten, gate=args.gate)
+    out = os.environ.get("GITHUB_OUTPUT")
+    if out:
+        with open(out, "a") as f:
+            f.write(f"active={'1' if active else '0'}\n")
+    if args.report:
+        dl.report()
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -510,10 +523,13 @@ def main():
     tr.add_argument("--today")
     tr.add_argument("--no-download", action="store_true")
     sub.add_parser("test")
+    dl = sub.add_parser("daytrade-live", help="run the live (paper) opening-range day-trader")
+    dl.add_argument("--until", default="15:57"); dl.add_argument("--flatten"); dl.add_argument("--gate", action="store_true")
+    dl.add_argument("--report", action="store_true")
     args = ap.parse_args()
     fn = {"daily": cmd_daily, "signal": cmd_signal, "backtest": cmd_backtest, "update-data": cmd_update,
           "status": cmd_status, "resume": cmd_resume, "test": cmd_test,
-          "start-trial": cmd_start_trial, "notes": cmd_notes}[args.cmd]
+          "start-trial": cmd_start_trial, "notes": cmd_notes, "daytrade-live": cmd_daytrade_live}[args.cmd]
     try:
         return fn(args)
     except Exception:  # noqa: BLE001

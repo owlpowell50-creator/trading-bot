@@ -1,0 +1,52 @@
+# Live (paper) day-trading: Opening Range Breakout on SPY and QQQ in a SEPARATE Alpaca paper account.
+# Two cron lines because of daylight saving; the script only proceeds when it is 09:xx in New York.
+name: Day trader
+on:
+  schedule:
+    - cron: "10 13 * * 1-5"
+    - cron: "10 14 * * 1-5"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: daytrade
+  cancel-in-progress: false
+jobs:
+  morning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    outputs:
+      active: ${{ steps.dt.outputs.active }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Trade the open (until 12:45 New York)
+        id: dt
+        env:
+          APCA_DT_KEY_ID: ${{ secrets.APCA_DT_KEY_ID }}
+          APCA_DT_SECRET_KEY: ${{ secrets.APCA_DT_SECRET_KEY }}
+        run: python run.py daytrade-live --until 12:45 ${{ github.event_name == 'schedule' && '--gate' || '' }}
+  afternoon:
+    needs: morning
+    if: needs.morning.outputs.active == '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Manage, flatten at 15:55, write the report
+        env:
+          APCA_DT_KEY_ID: ${{ secrets.APCA_DT_KEY_ID }}
+          APCA_DT_SECRET_KEY: ${{ secrets.APCA_DT_SECRET_KEY }}
+        run: python run.py daytrade-live --until 15:57 --flatten 15:55 --report
+      - name: Save the report to the repo
+        run: |
+          git config user.name "trading-bot"; git config user.email "trading-bot@users.noreply.github.com"
+          git add state/daytrade_live.json "12 - Live Day Trading.md" 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "Day trader report $(date -u +%F)"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done

@@ -278,5 +278,38 @@ class LiveAndDayTrade(unittest.TestCase):
         self.assertAlmostEqual(live.realized_pnl(orders)["VOO"], 10 * 20 + 5 * 10)
 
 
+class LiveDayTrader(unittest.TestCase):
+    def _bars(self, path):
+        hms = [f"{9 + (30 + 5 * i) // 60:02d}:{(30 + 5 * i) % 60:02d}" for i in range(len(path))]
+        return [{"hm": h, "o": o, "h": hi, "l": lo, "c": c} for h, (o, hi, lo, c) in zip(hms, path)]
+
+    def test_plan_long_on_fresh_breakout(self):
+        from bot.daytrade_live import plan
+        p = plan(self._bars([(100, 101, 99, 100)] * 3 + [(100.5, 101.6, 100.4, 101.4)]), 25000)
+        self.assertEqual(p["side"], "buy"); self.assertEqual(p["stop"], 99.0)
+        self.assertAlmostEqual(p["target"], round(101.4 + 1.5 * 2, 2))
+        self.assertLessEqual(p["qty"] * 101.4, 25000 * 0.2)
+
+    def test_plan_skips_old_breakout(self):
+        from bot.daytrade_live import plan
+        p = plan(self._bars([(100, 101, 99, 100)] * 3 + [(100.5, 101.6, 100.4, 101.4), (101.4, 101.5, 101.0, 101.2)]), 25000)
+        self.assertIn("skip", p)
+
+    def test_plan_none_inside_range(self):
+        from bot.daytrade_live import plan
+        self.assertIsNone(plan(self._bars([(100, 101, 99, 100)] * 5), 25000))
+
+    def test_refuses_long_term_account(self):
+        from bot import daytrade_live as dl
+        def fake(method, path, body=None):
+            if path == "/v2/clock": return {"is_open": True, "next_open": "2099-01-01T14:30:00Z"}
+            if path == "/v2/account": return {"equity": "99000", "last_equity": "99000"}
+            if path == "/v2/positions": return [{"symbol": "VOO"}]
+            return {}
+        if True:
+            with self.assertRaises(RuntimeError):
+                dl.run("15:57", gate=False, log=lambda *a: None, api=dl.Alpaca(http=fake))
+
+
 if __name__ == "__main__":
     unittest.main()
