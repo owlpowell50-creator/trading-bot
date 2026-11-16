@@ -15,7 +15,7 @@ tags:
 
 # Trading Bot — Dashboard
 
-> [!info] 🤖 Bot is ACTIVE — last run 2026-11-16 at 13:47: **HOLD**
+> [!info] 🤖 Bot is ACTIVE — last run 2026-11-16 at 13:49: **HOLD**
 > No rebalance due (signal of 2026-10-30 already acted on).
 > Next scheduled rebalance: **2026-12-01** (first trading day of the month). Every other weekday it checks prices and risk, and writes a journal.
 
@@ -25,11 +25,11 @@ tags:
 
 | | |
 |---|---|
-| Equity | 99,240 |
+| Equity | 99,231 |
 | Started with | 100,000 |
 | Return since start | -0.8% |
 | Peak | 99,989 |
-| Drawdown | -0.7% (halt at -25%) |
+| Drawdown | -0.8% (halt at -25%) |
 
 ## Holdings now
 
@@ -52,6 +52,7 @@ pie showData title What the bot holds now
 
 | Date | Status | Equity |
 |---|---|---|
+| [[2026-11-16]] | HOLD | 99,231 |
 | [[2026-11-16]] | HOLD | 99,240 |
 | [[2026-11-13]] | HOLD | 99,471 |
 | [[2026-11-12]] | TRADED | 99,989 |
@@ -61,8 +62,8 @@ pie showData title What the bot holds now
 xychart-beta
     title "Paper account value"
     x-axis ["11-12", "11-13", "11-16"]
-    y-axis "Value" 99166 --> 100064
-    line [99989.1, 99470.6, 99240.4]
+    y-axis "Value" 99155 --> 100065
+    line [99989.1, 99470.6, 99230.9]
 ```
 
 ## Notes

@@ -18,7 +18,7 @@ tags:
 **2026-11-12 → 2026-12-12** · account `alpaca-paper` starting at 100,000 · settings: worst month 15% (vol cap 22.3%), max 80% per ETF, region `us`
 
 > [!success] Day 3: bot -0.8% vs S&P 500 -0.8%
-> Equity 99,240 · ahead by 0.1 points (prices through 2026-11-13)
+> Equity 99,231 · ahead by 0.1 points (prices through 2026-11-13)
 
 ## Daily log
 
@@ -26,7 +26,7 @@ tags:
 |---|---|---|---|---|---|
 | [[2026-11-12]] | 2026-11-12 | 99,989 | -0.0% | +0.0% | -0.0% |
 | [[2026-11-13]] | 2026-11-13 | 99,471 | -0.5% | -1.3% | +0.7% |
-| [[2026-11-16]] | 2026-11-13 | 99,240 | -0.8% | -0.8% | +0.1% |
+| [[2026-11-16]] | 2026-11-13 | 99,231 | -0.8% | -0.8% | +0.1% |
 
 ```mermaid
 xychart-beta
