@@ -8,7 +8,7 @@ Rules - identical to the simulator in daytrade.py and 'Day Traders/12':
                   -> market order with an attached bracket: stop at the other side of the range,
                   take-profit at 1.5 x range height; no new entries after 15:00
   size            risk 0.5% of the day-trading account per trade, position <= 20% of it
-  limits          one trade per symbol per day; no new trades after a -$500 day
+  limits          one trade per symbol per day; no new trades after losing 2% in a day
   flat            every open order cancelled and every position closed at 15:55
 
 Keys: APCA_DT_KEY_ID / APCA_DT_SECRET_KEY (a second Alpaca paper account). The code only ever
@@ -35,7 +35,7 @@ NY = ZoneInfo("America/New_York")
 PAPER = "https://paper-api.alpaca.markets"
 DATA = "https://data.alpaca.markets"
 STATE = ROOT / "state" / "daytrade_live.json"
-DAY_LOSS = 500.0
+DAY_LOSS_PCT = 0.02          # stop for the day after losing 2% of the account (=$500 on $25k)
 LONG_TERM = {"VOO", "IEFA", "IEF", "TLT", "VNQ", "GLDM", "PDBC", "SGOV"}
 
 
@@ -185,7 +185,7 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
             break
         if now < at(day, "15:00"):
             eq = float(api.call("GET", "/v2/account")["equity"])
-            if eq - start_eq <= -DAY_LOSS:
+            if eq - start_eq <= -DAY_LOSS_PCT * start_eq:
                 if "loss" not in skipped:
                     log(f"daily loss limit hit ({eq - start_eq:+,.2f}) - no more trades today"); skipped.add("loss")
             else:
