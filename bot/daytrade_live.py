@@ -217,6 +217,14 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
     return True
 
 
+def check(log=print):
+    api = Alpaca()
+    a = api.call("GET", "/v2/account"); pos = api.call("GET", "/v2/positions")
+    log(f"CHECK account ...{str(a.get('account_number', ''))[-4:]} status {a.get('status')} equity ${float(a['equity']):,.2f} "
+        f"cash ${float(a['cash']):,.2f} buying power ${float(a['buying_power']):,.2f} shorting {a.get('shorting_enabled')} "
+        f"positions {[p['symbol'] for p in pos] or 'none'} long-term ETFs present: {any(p['symbol'] in LONG_TERM for p in pos)}")
+
+
 def report(today: str | None = None, log=print):
     """Rebuild today's trades from Alpaca fills, append to the state file and write the note."""
     try:

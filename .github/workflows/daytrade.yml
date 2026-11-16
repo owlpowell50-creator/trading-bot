@@ -5,7 +5,12 @@ on:
   schedule:
     - cron: "10 13 * * 1-5"
     - cron: "10 14 * * 1-5"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      check:
+        description: "Only check the account connection"
+        required: false
+        default: "no"
 permissions:
   contents: write
 concurrency:
@@ -27,7 +32,7 @@ jobs:
         env:
           APCA_DT_KEY_ID: ${{ secrets.APCA_DT_KEY_ID }}
           APCA_DT_SECRET_KEY: ${{ secrets.APCA_DT_SECRET_KEY }}
-        run: python run.py daytrade-live --until 12:45 ${{ github.event_name == 'schedule' && '--gate' || '' }}
+        run: python run.py daytrade-live --until 12:45 ${{ github.event_name == 'schedule' && '--gate' || '' }} ${{ github.event.inputs.check == 'yes' && '--check' || '' }}
   afternoon:
     needs: morning
     if: needs.morning.outputs.active == '1'

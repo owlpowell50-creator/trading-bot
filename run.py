@@ -493,6 +493,8 @@ def cmd_test(args):
 
 def cmd_daytrade_live(args):
     from bot import daytrade_live as dl
+    if args.check:
+        dl.check(); return 0
     active = dl.run(args.until, args.flatten, gate=args.gate)
     out = os.environ.get("GITHUB_OUTPUT")
     if out:
@@ -525,7 +527,7 @@ def main():
     sub.add_parser("test")
     dl = sub.add_parser("daytrade-live", help="run the live (paper) opening-range day-trader")
     dl.add_argument("--until", default="15:57"); dl.add_argument("--flatten"); dl.add_argument("--gate", action="store_true")
-    dl.add_argument("--report", action="store_true")
+    dl.add_argument("--report", action="store_true"); dl.add_argument("--check", action="store_true")
     args = ap.parse_args()
     fn = {"daily": cmd_daily, "signal": cmd_signal, "backtest": cmd_backtest, "update-data": cmd_update,
           "status": cmd_status, "resume": cmd_resume, "test": cmd_test,
