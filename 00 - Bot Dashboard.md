@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-13
+updated: 2026-11-16
 tags:
   - type/dashboard
   - department/trading
@@ -15,7 +15,7 @@ tags:
 
 # Trading Bot — Dashboard
 
-> [!info] 🤖 Bot is ACTIVE — last run 2026-11-13 at 15:51: **HOLD**
+> [!info] 🤖 Bot is ACTIVE — last run 2026-11-16 at 13:47: **HOLD**
 > No rebalance due (signal of 2026-10-30 already acted on).
 > Next scheduled rebalance: **2026-12-01** (first trading day of the month). Every other weekday it checks prices and risk, and writes a journal.
 
@@ -25,11 +25,11 @@ tags:
 
 | | |
 |---|---|
-| Equity | 99,471 |
+| Equity | 99,240 |
 | Started with | 100,000 |
-| Return since start | -0.5% |
+| Return since start | -0.8% |
 | Peak | 99,989 |
-| Drawdown | -0.5% (halt at -25%) |
+| Drawdown | -0.7% (halt at -25%) |
 
 ## Holdings now
 
@@ -37,14 +37,14 @@ tags:
 |---|---|---|
 | US stocks (S&P 500) | 38.8% | VOO (US-listed) |
 | Developed ex-US stocks | 37.0% | IEFA (US-listed) |
-| Commodities | 23.7% | PDBC (US-listed) |
+| Commodities | 23.6% | PDBC (US-listed) |
 | Cash (T-bills) | 0.5% | SGOV (US-listed) |
 
 ```mermaid
 pie showData title What the bot holds now
     "US stocks (S&P 500) (VOO)" : 38.8
     "Developed ex-US stocks (IEFA)" : 37.0
-    "Commodities (PDBC)" : 23.7
+    "Commodities (PDBC)" : 23.6
     "Cash (T-bills) (SGOV)" : 0.5
 ```
 
@@ -52,6 +52,7 @@ pie showData title What the bot holds now
 
 | Date | Status | Equity |
 |---|---|---|
+| [[2026-11-16]] | HOLD | 99,240 |
 | [[2026-11-13]] | HOLD | 99,471 |
 | [[2026-11-12]] | TRADED | 99,989 |
 
@@ -59,9 +60,9 @@ pie showData title What the bot holds now
 ```mermaid
 xychart-beta
     title "Paper account value"
-    x-axis ["11-12", "11-13"]
-    y-axis "Value" 99419 --> 100041
-    line [99989.1, 99470.6]
+    x-axis ["11-12", "11-13", "11-16"]
+    y-axis "Value" 99166 --> 100064
+    line [99989.1, 99470.6, 99240.4]
 ```
 
 ## Notes
