@@ -22,10 +22,13 @@ jobs:
         with:
           python-version: "3.11"
       - name: Download from SEC EDGAR
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
         run: |
           if [ -n "${{ github.event.inputs.limit }}" ]; then L="--limit ${{ github.event.inputs.limit }}"; fi
           python tools/sec_fundamentals.py tools/ciks.tsv sec_fundamentals.jsonl.gz $L
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: sec-fundamentals
           path: sec_fundamentals.jsonl.gz

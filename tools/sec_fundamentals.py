@@ -18,7 +18,8 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timezone
 
-UA = "TradingBotResearch github.com/owlpowell50-creator/trading-bot"
+import os
+UA = os.environ.get("SEC_USER_AGENT") or "TradingBotResearch admin@tradingbot-research.example"
 
 # XBRL concept -> standard label (same mapping as Company/_build/statement_analysis.py)
 LINES = {
@@ -175,6 +176,8 @@ def main():
             done += 1
             k = r["status"].split(":")[0]
             stats[k] = stats.get(k, 0) + 1
+            if k == "error" and stats[k] <= 3:
+                print("example error:", r["status"], flush=True)
             if done % 250 == 0:
                 print(f"{done}/{len(rows)}  {time.time() - t0:.0f}s  {stats}", flush=True)
     print("done", stats, f"{time.time() - t0:.0f}s",
