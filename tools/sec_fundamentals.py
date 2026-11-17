@@ -147,6 +147,10 @@ def one(row):
                                     "accession": rec["accessionNumber"][last10k],
                                     "doc": rec.get("primaryDocument", [""] * (last10k + 1))[last10k]}
                        if last10k is not None else None)
+            desc = rec.get("primaryDocDescription", [""] * len(forms))
+            out["recent"] = [{"form": forms[i], "date": rec["filingDate"][i], "report": (rec.get("reportDate") or [""] * len(forms))[i],
+                              "acc": rec["accessionNumber"][i], "doc": rec.get("primaryDocument", [""] * len(forms))[i], "desc": desc[i] if i < len(desc) else ""}
+                             for i in range(min(12, len(forms)))]
         cf = get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{c10}.json")
         if cf:
             out["entity"] = cf.get("entityName")
