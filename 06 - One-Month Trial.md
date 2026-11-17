@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-16
+updated: 2026-11-17
 tags:
   - type/trial
   - department/trading
@@ -17,8 +17,8 @@ tags:
 
 **2026-11-12 → 2026-12-12** · account `alpaca-paper` starting at 100,000 · settings: worst month 15% (vol cap 22.3%), max 80% per ETF, region `us`
 
-> [!success] Day 3: bot -0.8% vs S&P 500 -0.8%
-> Equity 99,231 · ahead by 0.1 points (prices through 2026-11-13)
+> [!success] Day 4: bot -2.8% vs S&P 500 -4.0%
+> Equity 97,159 · ahead by 1.2 points (prices through 2026-11-17)
 
 ## Daily log
 
@@ -27,14 +27,15 @@ tags:
 | [[2026-11-12]] | 2026-11-12 | 99,989 | -0.0% | +0.0% | -0.0% |
 | [[2026-11-13]] | 2026-11-13 | 99,471 | -0.5% | -1.3% | +0.7% |
 | [[2026-11-16]] | 2026-11-13 | 99,231 | -0.8% | -0.8% | +0.1% |
+| [[2026-11-17]] | 2026-11-17 | 97,159 | -2.8% | -4.0% | +1.2% |
 
 ```mermaid
 xychart-beta
     title "Return since start (%)"
-    x-axis ["11-12", "11-13", "11-16"]
-    y-axis "%" -1 --> 0
-    line [-0.0, -0.5, -0.8]
-    line [0.0, -1.3, -0.8]
+    x-axis ["11-12", "11-13", "11-16", "11-17"]
+    y-axis "%" -4 --> 0
+    line [-0.0, -0.5, -0.8, -2.8]
+    line [0.0, -1.3, -0.8, -4.0]
 ```
 *Lines: first = **Bot** · second = **S&P 500***
 
