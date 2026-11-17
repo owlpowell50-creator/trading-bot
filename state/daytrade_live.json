@@ -1,0 +1,38 @@
+{
+ "trades": [
+  {
+   "date": "2026-11-17",
+   "symbol": "SPY",
+   "side": "SHORT",
+   "qty": 27.0,
+   "entry": 736.7781,
+   "entry_time": "15:10",
+   "exit": 733.3867,
+   "exit_time": "15:40",
+   "pnl": 91.57,
+   "r": 1.2,
+   "risk": 76.0
+  },
+  {
+   "date": "2026-11-17",
+   "symbol": "QQQ",
+   "side": "SHORT",
+   "qty": 30.0,
+   "entry": 658.731,
+   "entry_time": "15:10",
+   "exit": 653.93,
+   "exit_time": "15:40",
+   "pnl": 144.03,
+   "r": 1.16,
+   "risk": 124.0
+  }
+ ],
+ "days": [
+  {
+   "date": "2026-11-17",
+   "equity": 100235.6
+  }
+ ],
+ "start": "2026-11-17",
+ "start_equity": 100000.0
+}
