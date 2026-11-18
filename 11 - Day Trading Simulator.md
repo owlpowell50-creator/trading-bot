@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-17
+updated: 2026-11-18
 tags:
   - type/day-trading-simulator
   - department/trading
@@ -24,14 +24,16 @@ tags:
 | | |
 |---|---|
 | Started with | $25,000.00 on 2026-10-26 |
-| **Equity now** | **$25,067.31** (+0.27%) |
-| Days processed through | 2026-11-16 |
+| **Equity now** | **$25,122.56** (+0.49%) |
+| Days processed through | 2026-11-17 |
 | Instruments | SPY, QQQ |
 
 ## Ledger
 
 | # | Date | Sym | Dir | Range | Entry (time) | Stop | Target | Exit (time) | Shares | P&L $ | R | Exit reason |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 32 | 2026-11-17 | QQQ | 🔴 Short | 659.85–663.32 | 658.96 (10:10) | 663.32 | 653.76 | 653.82 (10:40) | 7 | +35.98 | +1.18 | Target |
+| 31 | 2026-11-17 | SPY | 🔴 Short | 737.49–739.68 | 736.72 (10:10) | 739.68 | 733.43 | 733.50 (10:40) | 6 | +19.27 | +1.08 | Target |
 | 30 | 2026-11-16 | QQQ | 🔴 Short | 666.64–671.77 | 665.16 (10:05) | 671.77 | 657.47 | 661.63 (15:55) | 7 | +24.76 | +0.54 | Time (15:55) |
 | 29 | 2026-11-16 | SPY | 🔴 Short | 746.68–749.79 | 746.38 (10:00) | 749.79 | 741.71 | 741.78 (13:20) | 6 | +27.54 | +1.34 | Target |
 | 28 | 2026-11-13 | QQQ | 🔴 Short | 684.12–688.64 | 682.91 (09:50) | 688.64 | 676.13 | 676.20 (10:10) | 7 | +46.99 | +1.17 | Target |
@@ -67,23 +69,24 @@ tags:
 
 | Metric | Target | Actual |
 |---|---|---|
-| Trades logged | 100+ | 30 |
-| Expectancy (R) | > 0.15 | -0.13 |
-| Win rate | > 40% | 40% |
-| Average win : average loss | > 1.5 | 1.75 |
-| Profit factor | > 1.3 | 1.16 |
+| Trades logged | 100+ | 32 |
+| Expectancy (R) | > 0.15 | -0.05 |
+| Win rate | > 40% | 44% |
+| Average win : average loss | > 1.5 | 1.67 |
+| Profit factor | > 1.3 | 1.30 |
 | Max drawdown | < 10% | -0.69% |
 | Rule violations | 0 | 0 (rules are applied by code) |
-| Days processed / days with a trade | — | 16 / 16 |
-| Equity | — | $25,067.31 |
+| Days processed / days with a trade | — | 17 / 17 |
+| Equity | — | $25,122.56 |
 
 > [!important] Sample size
-> 30 trades. Under 30 is noise; under 100 is a hint. Judge it at 100.
+> 32 trades. Under 30 is noise; under 100 is a hint. Judge it at 100.
 
 ## Equity by day
 
 | Date | Trades | Day P&L | Equity |
 |---|---|---|---|
+| 2026-11-17 | 2 | +55.25 | $25,122.56 |
 | 2026-11-16 | 2 | +52.30 | $25,067.31 |
 | 2026-11-13 | 2 | +84.31 | $25,015.01 |
 | 2026-11-12 | 1 | -8.17 | $24,930.70 |
