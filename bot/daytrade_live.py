@@ -236,6 +236,10 @@ def check(log=print):
     log(f"CHECK account ...{str(a.get('account_number', ''))[-4:]} status {a.get('status')} equity ${float(a['equity']):,.2f} "
         f"cash ${float(a['cash']):,.2f} buying power ${float(a['buying_power']):,.2f} shorting {a.get('shorting_enabled')} "
         f"positions {[p['symbol'] for p in pos] or 'none'} long-term ETFs present: {any(p['symbol'] in LONG_TERM for p in pos)}")
+    from .skill_trader import replay_day
+    cal = api.call("GET", f"/v2/calendar?start={(et_now().date() - timedelta(days=7)).isoformat()}&end={(et_now().date() - timedelta(days=1)).isoformat()}")
+    if cal:
+        replay_day(api, date.fromisoformat(cal[-1]["date"]), float(a["equity"]), log)
 
 
 def report(today: str | None = None, log=print):

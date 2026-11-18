@@ -242,3 +242,36 @@ class SkillTrader:
         keep = [x for x in st.get("skill_log", []) if x.get("date") != self.day.isoformat()]
         st["skill_log"] = (keep + self.decisions)[-200:]
         STATE.write_text(json.dumps(st, indent=1))
+
+
+def replay_day(api, day, equity=100000.0, log=print):
+    """Dry run on a past session with real data: what the pipeline would have done at each 5-minute close.
+    Places no orders. Used by `run.py daytrade-live --check` to prove the data feeds work."""
+    from .daytrade_live import NY as ny
+    mods = pack()
+    end = datetime(day.year, day.month, day.day, 9, 0, tzinfo=ny)
+    hist = {}
+    for i in range(0, len(WATCH), 10):
+        hist.update(fetch_bars(api, WATCH[i:i + 10], end - timedelta(days=62), end, "sip"))
+    open_ = datetime(day.year, day.month, day.day, 9, 30, tzinfo=ny)
+    today = {}
+    for i in range(0, len(WATCH), 15):
+        today.update(fetch_bars(api, WATCH[i:i + 15], open_, open_ + timedelta(hours=2, minutes=5), "iex"))
+    log(f"skill replay {day}: history for {len(hist)} stocks "
+        f"({min((len(v) for v in hist.values()), default=0)}-{max((len(v) for v in hist.values()), default=0)} bars)")
+    out, done = [], set()
+    t = open_ + timedelta(minutes=20)
+    while t <= open_ + timedelta(hours=2) and len(done) < RULES["max_trades_per_day"]:
+        now_utc = (t + timedelta(seconds=10)).astimezone(timezone.utc)
+        for s in WATCH:
+            if s in done:
+                continue
+            bs = [b for b in today.get(s, [])
+                  if datetime.fromisoformat(b["t"].replace("Z", "+00:00")) + timedelta(minutes=5) <= now_utc]
+            d = evaluate(api, s, bs, hist.get(s, []), day, now_utc, equity, mods)
+            if d and not d.get("skip", "").startswith("breakout at"):
+                done.add(s); d["date"] = day.isoformat(); out.append(d)
+                log(f"  {s} {d['time']} @ {d['price']}: " + (f"skip - {d['skip']}" if "skip" in d else
+                    f"WOULD BUY {d['qty']} stop {d['stop']} target {d['target']} - {d['verdict'][:60]}"))
+        t += timedelta(minutes=5)
+    return out
