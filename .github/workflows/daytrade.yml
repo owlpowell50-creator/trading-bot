@@ -1,4 +1,5 @@
-# Live (paper) day-trading: Opening Range Breakout on SPY and QQQ in a SEPARATE Alpaca paper account.
+# Live (paper) day-trading in a SEPARATE Alpaca paper account: Opening Range Breakout on SPY/QQQ
+# plus the day-trader-skill pack pipeline (vendor/day-trader-skill) on 30 liquid stocks.
 # Two cron lines because of daylight saving; the script only proceeds when it is 09:xx in New York.
 name: Day trader
 on:
@@ -33,6 +34,14 @@ jobs:
           APCA_DT_KEY_ID: ${{ secrets.APCA_DT_KEY_ID }}
           APCA_DT_SECRET_KEY: ${{ secrets.APCA_DT_SECRET_KEY }}
         run: python run.py daytrade-live --until 12:45 ${{ github.event_name == 'schedule' && '--gate' || '' }} ${{ github.event.inputs.check == 'yes' && '--check' || '' }}
+      - name: Save the skill pack's decisions
+        if: steps.dt.outputs.active == '1'
+        run: |
+          git config user.name "trading-bot"; git config user.email "trading-bot@users.noreply.github.com"
+          git add state/daytrade_live.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "Day trader morning decisions $(date -u +%F)"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
   afternoon:
     needs: morning
     if: needs.morning.outputs.active == '1'
@@ -40,6 +49,8 @@ jobs:
     timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"

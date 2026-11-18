@@ -100,11 +100,11 @@ def bars_today(api: Alpaca, day: date):
     return out
 
 
-def todays_orb_orders(api: Alpaca, day: date):
+def todays_orb_orders(api: Alpaca, day: date, both: bool = False):
     after = at(day, "04:00").astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     orders = api.call("GET", f"/v2/orders?status=all&after={after}&limit=500&nested=true")
-    tag = f"orb-{day:%Y%m%d}-"
-    return [o for o in orders if (o.get("client_order_id") or "").startswith(tag)]
+    tags = (f"orb-{day:%Y%m%d}-", f"dts-{day:%Y%m%d}-") if both else (f"orb-{day:%Y%m%d}-",)
+    return [o for o in orders if (o.get("client_order_id") or "").startswith(tags)]
 
 
 def plan(bars, equity):
@@ -149,7 +149,8 @@ def flatten(api: Alpaca, log):
     log("flat: all orders cancelled, all positions closed")
 
 
-def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int = 20, log=print, api=None):
+def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int = 20, log=print, api=None,
+        skills: bool = True):
     try:
         api = api or Alpaca()
     except MissingKeys:
@@ -177,6 +178,13 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
         time.sleep(15)
     done = {o["symbol"] for o in todays_orb_orders(api, day)}
     skipped = set()
+    skill = None
+    if skills:
+        from .skill_trader import SkillTrader
+        try:
+            skill = SkillTrader(api, day, log)
+        except Exception as e:  # noqa: BLE001
+            log(f"skill pack unavailable: {e}")
     while True:
         now = et_now()
         if flat_t and now >= flat_t:
@@ -213,6 +221,11 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
                         done.add(s)
                     except Exception as e:  # noqa: BLE001
                         log(f"{s}: order rejected - {e}"); skipped.add(s)
+                if skill:
+                    try:
+                        skill.poll(float(api.call("GET", "/v2/account")["equity"]), et_now())
+                    except Exception as e:  # noqa: BLE001
+                        log(f"skill poll: {e}")
         time.sleep(poll)
     return True
 
@@ -234,11 +247,10 @@ def report(today: str | None = None, log=print):
     day = date.fromisoformat(today) if today else et_now().date()
     st = json.loads(STATE.read_text()) if STATE.exists() else {"trades": [], "days": []}
     fills = api.call("GET", f"/v2/account/activities/FILL?date={day.isoformat()}&direction=asc") or []
-    orders = {o["id"]: o for o in todays_orb_orders(api, day)}
+    orders = {o["id"]: o for o in todays_orb_orders(api, day, both=True)}
     by_sym = {}
     for f in fills:
-        if f.get("symbol") in SYMBOLS:
-            by_sym.setdefault(f["symbol"], []).append(f)
+        by_sym.setdefault(f["symbol"], []).append(f)
     st["trades"] = [t for t in st["trades"] if t["date"] != day.isoformat()]
     for s, fs in by_sym.items():
         entry = fs[0]; side = entry["side"]; q = sum(float(f["qty"]) for f in fs if f["side"] == side)
@@ -249,10 +261,11 @@ def report(today: str | None = None, log=print):
         pnl = ((xp - ein) if side == "buy" else (ein - xp)) * xq if xp else 0.0
         cid = next((o.get("client_order_id") for o in orders.values() if o["symbol"] == s), "") or ""
         risk = float(cid.split("-r")[-1]) if "-r" in cid else None
+        strat = "Skill pack" if cid.startswith("dts-") else "ORB"
         st["trades"].append({"date": day.isoformat(), "symbol": s, "side": "LONG" if side == "buy" else "SHORT", "qty": q,
                              "entry": round(ein, 4), "entry_time": entry["transaction_time"][11:16], "exit": round(xp, 4) if xp else None,
                              "exit_time": out[-1]["transaction_time"][11:16] if out else None, "pnl": round(pnl, 2),
-                             "r": round(pnl / risk, 2) if risk else None, "risk": risk})
+                             "r": round(pnl / risk, 2) if risk else None, "risk": risk, "strategy": strat})
     acct = api.call("GET", "/v2/account")
     st["days"] = [d for d in st["days"] if d["date"] != day.isoformat()] + [{"date": day.isoformat(), "equity": float(acct["equity"])}]
     st["start"] = st.get("start") or day.isoformat()
@@ -268,8 +281,9 @@ def write_note(st, today):
     L = [FM.format(type="live-day-trading", updated=today, extra_tags="\n  - day-trading\n  - alpaca"),
          "# 12 - Live Day Trading", "",
          "> [!success] Real orders in a separate Alpaca paper account",
-         "> The Opening Range Breakout rules from [[11 - Day Trading Simulator]] placed as real bracket orders on SPY and QQQ "
-         "(practice money, real fills). Flat every day by 15:55 New York.", "",
+         "> Two strategies, one account: the Opening Range Breakout rules from [[11 - Day Trading Simulator]] on SPY and QQQ, "
+         "and the **day-trader-skill pack** ([[14 - Skill Pack Day Trader]]: scanner → exit plan → news → time machine → sizing) on 30 liquid stocks. "
+         "Real bracket orders, practice money. Flat every day by 15:55 New York.", "",
          "## Account", "", "| | |", "|---|---|",
          f"| Started | {st.get('start')} with ${s0:,.2f} |",
          f"| **Equity** | **${eq:,.2f}** ({(eq / s0 - 1) * 100:+.2f}%) |" if eq else "| Equity | — |",
@@ -285,10 +299,29 @@ def write_note(st, today):
     if not tr:
         L.append("No trades yet.")
     else:
-        L += ["| Date | Sym | Dir | Qty | Entry (UTC) | Exit (UTC) | P&L $ | R |", "|---|---|---|---|---|---|---|---|"]
+        L += ["| Date | Strategy | Sym | Dir | Qty | Entry (UTC) | Exit (UTC) | P&L $ | R |", "|---|---|---|---|---|---|---|---|---|"]
         for t in reversed(tr):
             ex = f"{t['exit']:.2f} ({t['exit_time']})" if t.get("exit") else "open"
             rr = f"{t['r']:+.2f}" if t.get("r") is not None else "—"
-            L.append(f"| {t['date']} | {t['symbol']} | {t['side']} | {t['qty']:.0f} | {t['entry']:.2f} ({t['entry_time']}) | {ex} | {t['pnl']:+,.2f} | {rr} |")
+            L.append(f"| {t['date']} | {t.get('strategy', 'ORB')} | {t['symbol']} | {t['side']} | {t['qty']:.0f} | {t['entry']:.2f} ({t['entry_time']}) | {ex} | {t['pnl']:+,.2f} | {rr} |")
+    L += ["", "## By strategy", "", "| Strategy | Trades | Winners | P&L $ | Avg R |", "|---|---|---|---|---|"]
+    for name in ("ORB", "Skill pack"):
+        g = [t for t in tr if t.get("strategy", "ORB") == name]; gr = [t["r"] for t in g if t.get("r") is not None]
+        L.append(f"| {name} | {len(g)} | {sum(1 for t in g if t['pnl'] > 0)} | {sum(t['pnl'] for t in g):+,.2f} | "
+                 + (f"{sum(gr) / len(gr):+.2f} |" if gr else "— |"))
+    sl = st.get("skill_log") or []
+    L += ["", "## Skill pack decisions", "",
+          "Every breakout the scanner found and what the pipeline decided. Source: "
+          "[day-trader-skill](https://github.com/Jakeschincariol/day-trader-skill) (MIT), vendored in the repo.", ""]
+    if not sl:
+        L.append("No breakouts evaluated yet.")
+    else:
+        L += ["| Date | Sym | Breakout | Stop / target | Time machine | Decision |", "|---|---|---|---|---|---|"]
+        for d in reversed(sl[-40:]):
+            tmv = (f"target {d['p_target'] * 100:.0f}% / stop {d['p_stop'] * 100:.0f}%, avg R {d['avg_r']:+.2f}"
+                   if d.get("p_target") is not None else "—")
+            so = f"{d['stop']} / {d['target']}" if d.get("stop") else "—"
+            dec = f"skipped: {d['skip']}" if d.get("skip") else f"**bought {d['qty']}** (risk ${d['risk']:.0f})"
+            L.append(f"| {d['date']} | {d['symbol']} | {d['time']} @ {d['price']} | {so} | {tmv} | {dec.replace('|', '/')} |")
     L += ["", "Compare with the rule-based replay: [[11 - Day Trading Simulator#Scorecard]] · back to [[00 - Bot Dashboard]]", ""]
     _write(ROOT / "12 - Live Day Trading.md", "\n".join(L))

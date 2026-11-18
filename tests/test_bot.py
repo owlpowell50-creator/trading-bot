@@ -311,5 +311,55 @@ class LiveDayTrader(unittest.TestCase):
                 dl.run("15:57", gate=False, log=lambda *a: None, api=dl.Alpaca(http=fake))
 
 
+class SkillPack(unittest.TestCase):
+    """The vendored day-trader-skill pipeline: scanner -> exit -> news -> time machine -> sizing."""
+
+    def _data(self, news):
+        import random
+        from datetime import date as D, datetime as DT, timedelta as TD, timezone as TZ
+        from zoneinfo import ZoneInfo
+        ny = ZoneInfo("America/New_York")
+
+        def bars(d, rnd, upto=None):
+            out, p = [], 100.0
+            for k in range(78):
+                if upto is not None and k > upto:
+                    break
+                t = DT(d.year, d.month, d.day, 9, 30, tzinfo=ny) + TD(minutes=5 * k)
+                o = p; c = p * (1.01 if k == upto else 1 + rnd.gauss(0.0002, 0.002))
+                out.append({"t": t.astimezone(TZ.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "o": o, "h": max(o, c) * 1.0005,
+                            "l": min(o, c) * 0.9995, "c": c, "v": 1000}); p = c
+            return out
+        rnd = random.Random(1); hist = []; d = D(2026, 9, 20); n = 0
+        while n < 40:
+            d += TD(days=1)
+            if d.weekday() < 5:
+                hist += bars(d, rnd); n += 1
+
+        class Api:
+            def call(self, m, p, b=None, data=False):
+                return {"news": [{"headline": news}]}
+        now = DT(2026, 11, 18, 9, 55, 10, tzinfo=ny)
+        return Api(), bars(D(2026, 11, 18), rnd, upto=4), hist, D(2026, 11, 18), now
+
+    def test_breakout_passes_pipeline_and_sizes(self):
+        from bot import skill_trader as sk
+        api, tb, hist, day, now = self._data("Analyst upgrade")
+        d = sk.evaluate(api, "XYZ", tb, hist, day, now, 100000)
+        self.assertNotIn("skip", d, d)
+        self.assertLess(d["stop"], d["price"]); self.assertGreater(d["target"], d["price"])
+        self.assertLessEqual(d["qty"] * d["price"], 100000 * sk.RULES["max_position_pct"] + 1)
+        self.assertLessEqual(d["risk"], 100000 * sk.RULES["risk_pct"] + 1)
+        body = sk.order_body(d, day)
+        self.assertEqual(body["side"], "buy"); self.assertEqual(body["order_class"], "bracket")
+        self.assertTrue(body["client_order_id"].startswith("dts-20261118-XYZ-L-r"))
+
+    def test_earnings_news_blocks_trade(self):
+        from bot import skill_trader as sk
+        api, tb, hist, day, now = self._data("XYZ earnings results beat estimates")
+        d = sk.evaluate(api, "XYZ", tb, hist, day, now, 100000)
+        self.assertIn("news", d["skip"])
+
+
 if __name__ == "__main__":
     unittest.main()

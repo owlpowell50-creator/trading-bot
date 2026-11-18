@@ -17,7 +17,7 @@ tags:
 # 12 - Live Day Trading
 
 > [!success] Real orders in a separate Alpaca paper account
-> The Opening Range Breakout rules from [[11 - Day Trading Simulator]] placed as real bracket orders on SPY and QQQ (practice money, real fills). Flat every day by 15:55 New York.
+> Two strategies, one account: the Opening Range Breakout rules from [[11 - Day Trading Simulator]] on SPY and QQQ, and the **day-trader-skill pack** ([[14 - Skill Pack Day Trader]]: scanner → exit plan → news → time machine → sizing) on 30 liquid stocks. Real bracket orders, practice money. Flat every day by 15:55 New York.
 
 ## Account
 
@@ -38,9 +38,22 @@ tags:
 
 ## Ledger
 
-| Date | Sym | Dir | Qty | Entry (UTC) | Exit (UTC) | P&L $ | R |
-|---|---|---|---|---|---|---|---|
-| 2026-11-17 | QQQ | SHORT | 30 | 658.73 (15:10) | 653.93 (15:40) | +144.03 | +1.16 |
-| 2026-11-17 | SPY | SHORT | 27 | 736.78 (15:10) | 733.39 (15:40) | +91.57 | +1.20 |
+| Date | Strategy | Sym | Dir | Qty | Entry (UTC) | Exit (UTC) | P&L $ | R |
+|---|---|---|---|---|---|---|---|---|
+| 2026-11-17 | ORB | QQQ | SHORT | 30 | 658.73 (15:10) | 653.93 (15:40) | +144.03 | +1.16 |
+| 2026-11-17 | ORB | SPY | SHORT | 27 | 736.78 (15:10) | 733.39 (15:40) | +91.57 | +1.20 |
+
+## By strategy
+
+| Strategy | Trades | Winners | P&L $ | Avg R |
+|---|---|---|---|---|
+| ORB | 2 | 2 | +235.60 | +1.18 |
+| Skill pack | 0 | 0 | +0.00 | — |
+
+## Skill pack decisions
+
+Every breakout the scanner found and what the pipeline decided. Source: [day-trader-skill](https://github.com/Jakeschincariol/day-trader-skill) (MIT), vendored in the repo.
+
+No breakouts evaluated yet.
 
 Compare with the rule-based replay: [[11 - Day Trading Simulator#Scorecard]] · back to [[00 - Bot Dashboard]]

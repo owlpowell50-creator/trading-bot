@@ -11,7 +11,8 @@
    "exit_time": "15:40",
    "pnl": 91.57,
    "r": 1.2,
-   "risk": 76.0
+   "risk": 76.0,
+   "strategy": "ORB"
   },
   {
    "date": "2026-11-17",
@@ -24,7 +25,8 @@
    "exit_time": "15:40",
    "pnl": 144.03,
    "r": 1.16,
-   "risk": 124.0
+   "risk": 124.0,
+   "strategy": "ORB"
   }
  ],
  "days": [

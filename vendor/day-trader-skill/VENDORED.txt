@@ -1,0 +1,1 @@
+Vendored from https://github.com/Jakeschincariol/day-trader-skill at 3d0f4ef (MIT). Used as a library by bot/skill_trader.py.
