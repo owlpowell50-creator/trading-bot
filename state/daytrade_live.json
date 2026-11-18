@@ -36,5 +36,81 @@
   }
  ],
  "start": "2026-11-17",
- "start_equity": 100000.0
+ "start_equity": 100000.0,
+ "skill_log": [
+  {
+   "symbol": "DIS",
+   "time": "9:50 AM",
+   "price": 119.06,
+   "or_high": 118.9,
+   "or_low": 116.76,
+   "stop": 117.83,
+   "target": 121.52,
+   "news": [
+    "analyst",
+    "earnings"
+   ],
+   "skip": "news: earnings (Analysts Adjust Price Targets for The Walt Disney Company)",
+   "date": "2026-11-18"
+  },
+  {
+   "symbol": "AMZN",
+   "time": "10:00 AM",
+   "price": 263.28,
+   "or_high": 263.06,
+   "or_low": 259.65,
+   "stop": 261.36,
+   "target": 267.12,
+   "news": [],
+   "verdict": "Leans toward the stop: at 2R the target has to come first in 33 % of the replays that hit one side; it did in 27 % (target first 20.7 % vs stop first 54.7 %).",
+   "p_target": 0.2072,
+   "p_stop": 0.5471,
+   "avg_r": -0.027,
+   "sessions": 44,
+   "hist_trades": 29,
+   "hist_avg_r": -0.078,
+   "skip": "time machine: leans toward the stop",
+   "date": "2026-11-18"
+  },
+  {
+   "symbol": "UBER",
+   "time": "10:00 AM",
+   "price": 69.92,
+   "or_high": 69.75,
+   "or_low": 68.03,
+   "stop": 68.89,
+   "target": 71.98,
+   "news": [],
+   "verdict": "Strongly toward the stop: at 2R the target has to come first in 33 % of the replays that hit one side; it did in 10 % (target first 2.4 % vs stop first 22.4 %).",
+   "p_target": 0.0244,
+   "p_stop": 0.2236,
+   "avg_r": 0.035,
+   "sessions": 44,
+   "hist_trades": 20,
+   "hist_avg_r": -0.252,
+   "skip": "time machine: strongly toward the stop",
+   "date": "2026-11-18"
+  },
+  {
+   "symbol": "AVGO",
+   "time": "10:20 AM",
+   "price": 352.63,
+   "or_high": 351.7,
+   "or_low": 342.35,
+   "stop": 347.02,
+   "target": 363.85,
+   "news": [
+    "capital"
+   ],
+   "verdict": "Strongly toward the stop: at 2R the target has to come first in 33 % of the replays that hit one side; it did in 8 % (target first 3.1 % vs stop first 33.7 %).",
+   "p_target": 0.0306,
+   "p_stop": 0.3371,
+   "avg_r": -0.118,
+   "sessions": 44,
+   "hist_trades": 26,
+   "hist_avg_r": 0.048,
+   "skip": "time machine: strongly toward the stop",
+   "date": "2026-11-18"
+  }
+ ]
 }
