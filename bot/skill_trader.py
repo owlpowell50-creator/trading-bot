@@ -107,6 +107,9 @@ def news_flags(api, news, sym, day):
     import re
     tags, heads = set(), []
     for it in r.get("news") or []:
+        syms = it.get("symbols") or [sym]
+        if sym not in syms or len(syms) > 3:        # a roundup or someone else's story, not about this stock
+            continue
         hay = f"{it.get('headline', '')} {it.get('summary', '')}"
         t = {label for label, rx in news.KEYWORDS if re.search(rx, hay, re.I)}
         if t:
