@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-18
+updated: 2026-11-19
 tags:
   - type/dashboard
   - department/trading
@@ -15,36 +15,36 @@ tags:
 
 # Trading Bot — Dashboard
 
-> [!info] 🤖 Bot is ACTIVE — last run 2026-11-18 at 16:00: **HOLD**
+> [!info] 🤖 Bot is ACTIVE — last run 2026-11-19 at 16:00: **HOLD**
 > No rebalance due (signal of 2026-10-30 already acted on).
 > Next scheduled rebalance: **2026-12-01** (first trading day of the month). Every other weekday it checks prices and risk, and writes a journal.
 
-**Mode:** `alpaca-paper` · **Region:** `us` · **Strategy:** `CORE` · **Data through:** 2026-11-18
+**Mode:** `alpaca-paper` · **Region:** `us` · **Strategy:** `CORE` · **Data through:** 2026-11-19
 
 ## Account
 
 | | |
 |---|---|
-| Equity | 96,244 |
+| Equity | 95,889 |
 | Started with | 100,000 |
-| Return since start | -3.8% |
+| Return since start | -4.1% |
 | Peak | 99,989 |
-| Drawdown | -3.7% (halt at -25%) |
+| Drawdown | -4.1% (halt at -25%) |
 
 ## Holdings now
 
 | Asset | Weight | Instrument |
 |---|---|---|
-| US stocks (S&P 500) | 39.0% | VOO (US-listed) |
-| Developed ex-US stocks | 36.9% | IEFA (US-listed) |
-| Commodities | 23.5% | PDBC (US-listed) |
+| US stocks (S&P 500) | 39.1% | VOO (US-listed) |
+| Developed ex-US stocks | 36.8% | IEFA (US-listed) |
+| Commodities | 23.6% | PDBC (US-listed) |
 | Cash (T-bills) | 0.5% | SGOV (US-listed) |
 
 ```mermaid
 pie showData title What the bot holds now
-    "US stocks (S&P 500) (VOO)" : 39.0
-    "Developed ex-US stocks (IEFA)" : 36.9
-    "Commodities (PDBC)" : 23.5
+    "US stocks (S&P 500) (VOO)" : 39.1
+    "Developed ex-US stocks (IEFA)" : 36.8
+    "Commodities (PDBC)" : 23.6
     "Cash (T-bills) (SGOV)" : 0.5
 ```
 
@@ -52,6 +52,7 @@ pie showData title What the bot holds now
 
 | Date | Status | Equity |
 |---|---|---|
+| [[2026-11-19]] | HOLD | 95,889 |
 | [[2026-11-18]] | HOLD | 96,244 |
 | [[2026-11-17]] | HOLD | 97,159 |
 | [[2026-11-16]] | HOLD | 99,231 |
@@ -63,9 +64,9 @@ pie showData title What the bot holds now
 ```mermaid
 xychart-beta
     title "Paper account value"
-    x-axis ["11-12", "11-13", "11-16", "11-17", "11-18"]
-    y-axis "Value" 95870 --> 100364
-    line [99989.1, 99470.6, 99230.9, 97159.3, 96244.1]
+    x-axis ["11-12", "11-13", "11-16", "11-17", "11-18", "11-19"]
+    y-axis "Value" 95479 --> 100399
+    line [99989.1, 99470.6, 99230.9, 97159.3, 96244.1, 95888.9]
 ```
 
 ## Notes
