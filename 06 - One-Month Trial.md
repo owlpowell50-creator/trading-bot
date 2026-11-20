@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-19
+updated: 2026-11-20
 tags:
   - type/trial
   - department/trading
@@ -17,8 +17,8 @@ tags:
 
 **2026-11-12 → 2026-12-12** · account `alpaca-paper` starting at 100,000 · settings: worst month 15% (vol cap 22.3%), max 80% per ETF, region `us`
 
-> [!success] Day 6: bot -4.1% vs S&P 500 -4.2%
-> Equity 95,889 · ahead by 0.1 points (prices through 2026-11-19)
+> [!success] Day 7: bot -6.3% vs S&P 500 -7.1%
+> Equity 93,690 · ahead by 0.7 points (prices through 2026-11-20)
 
 ## Daily log
 
@@ -30,14 +30,15 @@ tags:
 | [[2026-11-17]] | 2026-11-17 | 97,159 | -2.8% | -4.0% | +1.2% |
 | [[2026-11-18]] | 2026-11-18 | 96,244 | -3.8% | -3.9% | +0.2% |
 | [[2026-11-19]] | 2026-11-19 | 95,889 | -4.1% | -4.2% | +0.1% |
+| [[2026-11-20]] | 2026-11-20 | 93,690 | -6.3% | -7.1% | +0.7% |
 
 ```mermaid
 xychart-beta
     title "Return since start (%)"
-    x-axis ["11-12", "11-13", "11-16", "11-17", "11-18", "11-19"]
-    y-axis "%" -5 --> 0
-    line [-0.0, -0.5, -0.8, -2.8, -3.8, -4.1]
-    line [0.0, -1.3, -0.8, -4.0, -3.9, -4.2]
+    x-axis ["11-12", "11-13", "11-16", "11-17", "11-18", "11-19", "11-20"]
+    y-axis "%" -8 --> 1
+    line [-0.0, -0.5, -0.8, -2.8, -3.8, -4.1, -6.3]
+    line [0.0, -1.3, -0.8, -4.0, -3.9, -4.2, -7.1]
 ```
 *Lines: first = **Bot** · second = **S&P 500***
 

@@ -1,8 +1,8 @@
 {
  "start": "2026-10-26",
  "capital": 25000.0,
- "equity": 25058.25,
- "last_day": "2026-11-18",
+ "equity": 25145.97,
+ "last_day": "2026-11-19",
  "trades": [
   {
    "symbol": "SPY",
@@ -649,6 +649,44 @@
    "reason": "Stop",
    "date": "2026-11-18",
    "n": 34
+  },
+  {
+   "symbol": "SPY",
+   "side": "SHORT",
+   "entry_time": "10:15",
+   "exit_time": "10:35",
+   "range_high": 739.77,
+   "range_low": 735.465,
+   "entry": 734.0966,
+   "stop": 739.77,
+   "target": 727.6391,
+   "exit": 727.7118,
+   "shares": 6,
+   "risk": 34.04,
+   "pnl": 38.31,
+   "r": 1.13,
+   "reason": "Target",
+   "date": "2026-11-19",
+   "n": 35
+  },
+  {
+   "symbol": "QQQ",
+   "side": "SHORT",
+   "entry_time": "10:15",
+   "exit_time": "10:30",
+   "range_high": 675.17,
+   "range_low": 670.42,
+   "entry": 668.2632,
+   "stop": 675.17,
+   "target": 661.1382,
+   "exit": 661.2043,
+   "shares": 7,
+   "risk": 48.35,
+   "pnl": 49.41,
+   "r": 1.02,
+   "reason": "Target",
+   "date": "2026-11-19",
+   "n": 36
   }
  ],
  "days": [
@@ -759,6 +797,12 @@
    "equity": 25058.25,
    "trades": 2,
    "pnl": -64.31
+  },
+  {
+   "date": "2026-11-19",
+   "equity": 25145.97,
+   "trades": 2,
+   "pnl": 87.72
   }
  ],
  "stopped": false,
