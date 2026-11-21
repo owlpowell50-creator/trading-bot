@@ -295,6 +295,11 @@ def live_notes(cfg, broker, today, run):
         run.setdefault("problems", [])
         print("live account note skipped:", e)
     try:
+        from bot import benchmarks
+        benchmarks.write(broker.data_http)
+    except Exception as e:  # noqa: BLE001
+        print("benchmarks skipped:", e)
+    try:
         st = daytrade.run(broker.data_http, today)
         daytrade.write_note(st, today)
     except Exception as e:  # noqa: BLE001

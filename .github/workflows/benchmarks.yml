@@ -1,0 +1,33 @@
+# Refresh the Dow / S&P 500 / Nasdaq closes the Obsidian home page compares against (state/benchmarks.json).
+# Also refreshed automatically by the daily run and the day trader's afternoon report.
+name: benchmarks
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Fetch index closes
+        env:
+          APCA_DT_KEY_ID: ${{ secrets.APCA_DT_KEY_ID }}
+          APCA_DT_SECRET_KEY: ${{ secrets.APCA_DT_SECRET_KEY }}
+        run: |
+          python -c "
+          from bot.daytrade_live import Alpaca
+          from bot import benchmarks
+          api = Alpaca()
+          assert benchmarks.write(lambda m, p, b=None: api.call(m, p, b, data=True))
+          "
+      - name: Commit
+        run: |
+          git config user.name "trading-bot"; git config user.email "trading-bot@users.noreply.github.com"
+          git add state/benchmarks.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Index closes for the home page $(date -u +%F)"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done

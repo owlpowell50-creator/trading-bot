@@ -276,6 +276,11 @@ def report(today: str | None = None, log=print):
     st["start_equity"] = st.get("start_equity") or float(acct.get("last_equity") or acct["equity"])
     STATE.write_text(json.dumps(st, indent=1))
     write_note(st, day.isoformat())
+    try:
+        from .benchmarks import write as write_benchmarks
+        write_benchmarks(lambda m, p, b=None: api.call(m, p, b, data=True))
+    except Exception as e:  # noqa: BLE001
+        log(f"benchmarks skipped: {e}")
     log(f"report written: {len([t for t in st['trades'] if t['date'] == day.isoformat()])} trades today")
 
 
