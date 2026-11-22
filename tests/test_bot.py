@@ -361,5 +361,40 @@ class SkillPack(unittest.TestCase):
         self.assertIn("news", d["skip"])
 
 
+class DayRiskBudget(unittest.TestCase):
+    """$1,000 of risk a day across both day-trading strategies."""
+
+    class Api:
+        def __init__(self, pos, orders):
+            self.pos, self.orders = pos, orders
+
+        def call(self, m, p, b=None, data=False):
+            return self.pos if p.startswith("/v2/positions") else self.orders
+
+    def test_budget_counts_losses_and_open_stops(self):
+        from bot import daytrade_live as dl
+        api = self.Api([{"symbol": "SPY", "qty": "100", "current_price": "500"}],
+                       [{"symbol": "SPY", "type": "market", "status": "filled",
+                         "legs": [{"symbol": "SPY", "type": "stop", "stop_price": "497", "status": "held"},
+                                  {"symbol": "SPY", "type": "limit", "limit_price": "505", "status": "new"}]}])
+        # down $200 on the day, and the open SPY trade can still lose $300 at its stop -> $500 left
+        self.assertAlmostEqual(dl.risk_left(api, 100000, 99800), 500.0)
+        short = self.Api([{"symbol": "QQQ", "qty": "-50", "current_price": "400"}],
+                         [{"symbol": "QQQ", "type": "stop", "stop_price": "404", "status": "held"}])
+        self.assertAlmostEqual(dl.risk_left(short, 100000, 100000), 800.0)
+        self.assertAlmostEqual(dl.risk_left(self.Api([], []), 100000, 99000), 0.0)
+
+    def test_plan_is_shrunk_to_the_budget_left(self):
+        from bot import daytrade_live as dl
+        self.assertEqual(dl.DAY_RISK_USD, 1000.0)
+        bars = [{"hm": f"09:{m:02d}", "o": 100, "h": 101, "l": 99, "c": 100} for m in (30, 35, 40)]
+        bars.append({"hm": "09:45", "o": 100, "h": 102, "l": 100, "c": 101.5})
+        full = dl.plan(bars, 100000)
+        small = dl.plan(bars, 100000, 150)
+        if full and "skip" not in full:
+            self.assertLessEqual(small["risk"], 150.0 + 1e-6)
+            self.assertLess(small["qty"], full["qty"])
+
+
 if __name__ == "__main__":
     unittest.main()

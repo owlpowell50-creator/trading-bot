@@ -118,7 +118,7 @@ def news_flags(api, news, sym, day):
     return tags, heads[:3]
 
 
-def evaluate(api, sym, today_bars, hist_bars, day, now_utc, equity, mods=None):
+def evaluate(api, sym, today_bars, hist_bars, day, now_utc, equity, mods=None, max_risk=None):
     """Run one stock through scanner -> exit -> news -> time machine -> sizing. Returns a decision dict."""
     scan, tm, news = mods or pack()
     bars = scanner_bars(scan, today_bars, day)
@@ -158,7 +158,8 @@ def evaluate(api, sym, today_bars, hist_bars, day, now_utc, equity, mods=None):
         d["skip"] = "time machine: " + doc["verdict"].split(":")[0].lower(); return d
     if (target - entry) / risk < RULES["min_reward_risk"]:
         d["skip"] = "reward/risk too low"; return d
-    qty = min(math.floor(equity * RULES["risk_pct"] / risk), math.floor(equity * RULES["max_position_pct"] / entry))
+    budget = equity * RULES["risk_pct"] if max_risk is None else min(equity * RULES["risk_pct"], max_risk)
+    qty = min(math.floor(budget / risk), math.floor(equity * RULES["max_position_pct"] / entry))
     if qty < 1:
         d["skip"] = "size rounds to zero"; return d
     d.update(qty=qty, risk=round(qty * risk, 2))
@@ -201,7 +202,7 @@ class SkillTrader:
         self.ready = True
         self.log(f"skill: history loaded for {len(self.hist)} stocks; {len(self.done)} skill trades already today")
 
-    def poll(self, equity, now_et):
+    def poll(self, equity, now_et, risk_left=None):
         from .daytrade_live import at
         if now_et < at(self.day, RULES["no_entries_before"]) or now_et >= at(self.day, RULES["no_entries_after"]):
             return
@@ -219,7 +220,9 @@ class SkillTrader:
             bs = [b for b in today.get(s, [])
                   if datetime.fromisoformat(b["t"].replace("Z", "+00:00")) + timedelta(minutes=5) <= now_utc]
             try:
-                d = evaluate(self.api, s, bs, self.hist.get(s, []), self.day, now_utc, equity, self.mods)
+                if risk_left is not None and risk_left < 50:
+                    break
+                d = evaluate(self.api, s, bs, self.hist.get(s, []), self.day, now_utc, equity, self.mods, risk_left)
             except Exception as e:  # noqa: BLE001
                 self.log(f"skill {s}: error {e}"); self.seen.add(s); continue
             if not d:
@@ -231,6 +234,8 @@ class SkillTrader:
                 try:
                     o = self.api.call("POST", "/v2/orders", order_body(d, self.day))
                     self.done.add(s); d["order"] = (o.get("id") or "")[:8]
+                    if risk_left is not None:
+                        risk_left -= d["risk"]
                     self.log(f"skill {s}: LONG {d['qty']} at ~{d['price']} after the {d['time']} close; stop {d['stop']} "
                              f"target {d['target']} risk ${d['risk']:.0f}; {d['verdict']}")
                 except Exception as e:  # noqa: BLE001

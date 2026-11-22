@@ -102,7 +102,7 @@ The bot lost less than the S&P 500 (with dividends) in **12 of 12** crises.
 
 ## Day trader (opening-range breakout on SPY and QQQ) through the crises with 5-minute data
 
-$100,000 practice account, same rules as the live day trader (2% daily loss limit, flat every night). Alpaca SIP 5-minute bars, so only crises from 2016 on.
+$100,000 practice account, the live day trader's entry rules with a 2% daily loss limit (the live bot now uses a $1,000-a-day risk budget), flat every night. Alpaca SIP 5-minute bars, so only crises from 2016 on.
 
 | Crisis | Return | Worst fall | Trades | Winners | Profit factor | S&P 500 same window |
 |---|---|---|---|---|---|---|

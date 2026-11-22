@@ -8,7 +8,8 @@ Rules - identical to the simulator in daytrade.py and 'Day Traders/12':
                   -> market order with an attached bracket: stop at the other side of the range,
                   take-profit at 1.5 x range height; no new entries after 15:00
   size            risk 0.5% of the day-trading account per trade, position <= 20% of it
-  limits          one trade per symbol per day; no new trades after losing 2% in a day
+  limits          one trade per symbol per day; $1,000 of risk a day: losses so far + what the open
+                  trades could still lose at their stops never exceeds $1,000, new trades are sized to fit
   flat            every open order cancelled and every position closed at 15:55
 
 Keys: APCA_DT_KEY_ID / APCA_DT_SECRET_KEY (a second Alpaca paper account). The code only ever
@@ -35,7 +36,8 @@ NY = ZoneInfo("America/New_York")
 PAPER = "https://paper-api.alpaca.markets"
 DATA = "https://data.alpaca.markets"
 STATE = ROOT / "state" / "daytrade_live.json"
-DAY_LOSS_PCT = 0.02          # stop for the day after losing 2% of the account (=$500 on $25k)
+DAY_RISK_USD = 1000.0        # the most the day trader may lose in one day (both strategies together)
+MIN_TRADE_RISK = 50.0        # don't open a trade that can only risk less than this
 LONG_TERM = {"VOO", "IEFA", "IEF", "TLT", "VNQ", "GLDM", "PDBC", "SGOV"}
 
 
@@ -107,7 +109,7 @@ def todays_orb_orders(api: Alpaca, day: date, both: bool = False):
     return [o for o in orders if (o.get("client_order_id") or "").startswith(tags)]
 
 
-def plan(bars, equity):
+def plan(bars, equity, max_risk=None):
     """Return the trade the rules want right now for one symbol's completed bars, or None."""
     rng = [b for b in bars if b["hm"] < "09:45"]
     if len(rng) < 3 or bars[0]["hm"] != "09:30":
@@ -130,11 +132,32 @@ def plan(bars, equity):
     stop = lo if side == "buy" else hi
     target = ref + TARGET_X * height if side == "buy" else ref - TARGET_X * height
     per = abs(ref - stop)
-    qty = min(math.floor(equity * RISK / per), math.floor(equity * MAX_POS / ref)) if per > 0 else 0
+    budget = equity * RISK if max_risk is None else min(equity * RISK, max_risk)
+    qty = min(math.floor(budget / per), math.floor(equity * MAX_POS / ref)) if per > 0 else 0
     if qty < 1:
         return {"skip": "size rounds to zero"}
     return {"side": side, "qty": qty, "ref": ref, "stop": round(stop, 2), "target": round(target, 2),
             "risk": round(per * qty, 2), "hi": hi, "lo": lo, "bar": first["hm"]}
+
+
+def risk_left(api: Alpaca, start_eq: float, equity: float) -> float:
+    """$ of today's $1,000 still unused: DAY_RISK_USD - today's loss so far (open trades marked to market)
+    - what the open positions would still lose if every stop were hit."""
+    used = max(0.0, start_eq - equity)
+    pos = api.call("GET", "/v2/positions")
+    if pos:
+        stops = {}
+        since = (et_now() - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        for o in api.call("GET", f"/v2/orders?status=all&nested=true&limit=500&after={since}"):
+            for leg in [o] + (o.get("legs") or []):
+                if (leg.get("type") in ("stop", "stop_limit") and leg.get("stop_price")
+                        and leg.get("status") in ("new", "held", "accepted", "pending_new", "partially_filled")):
+                    stops[leg["symbol"]] = float(leg["stop_price"])
+        for p in pos:
+            q, px = float(p["qty"]), float(p["current_price"])
+            st = stops.get(p["symbol"])
+            used += abs(q) * px if st is None else max(0.0, (px - st) * q)   # q < 0 for shorts
+    return DAY_RISK_USD - used
 
 
 def flatten(api: Alpaca, log):
@@ -193,10 +216,13 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
             break
         if now < at(day, "15:00"):
             eq = float(api.call("GET", "/v2/account")["equity"])
-            if eq - start_eq <= -DAY_LOSS_PCT * start_eq:
+            left = risk_left(api, start_eq, eq)
+            if left < MIN_TRADE_RISK:
                 if "loss" not in skipped:
-                    log(f"daily loss limit hit ({eq - start_eq:+,.2f}) - no more trades today"); skipped.add("loss")
+                    log(f"daily $1,000 risk used (P&L {eq - start_eq:+,.2f}, ${max(left, 0):,.0f} left) - "
+                        "no new trades until it frees up"); skipped.add("loss")
             else:
+                skipped.discard("loss")
                 try:
                     bars = bars_today(api, day)
                 except Exception as e:  # noqa: BLE001
@@ -204,7 +230,7 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
                 for s in SYMBOLS:
                     if s in done or s in skipped or not bars.get(s):
                         continue
-                    p = plan(bars[s], eq)
+                    p = plan(bars[s], eq, left)
                     if not p:
                         continue
                     if "skip" in p:
@@ -218,12 +244,13 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
                         log(f"{s}: {'LONG' if p['side'] == 'buy' else 'SHORT'} {p['qty']} after the {p['bar']} bar closed "
                             f"{p['ref']:.2f} (range {p['lo']:.2f}-{p['hi']:.2f}); stop {p['stop']}, target {p['target']}, "
                             f"risk ${p['risk']:.0f} - order {o.get('id', '')[:8]}")
-                        done.add(s)
+                        done.add(s); left -= p["risk"]
                     except Exception as e:  # noqa: BLE001
                         log(f"{s}: order rejected - {e}"); skipped.add(s)
                 if skill:
                     try:
-                        skill.poll(float(api.call("GET", "/v2/account")["equity"]), et_now())
+                        eq2 = float(api.call("GET", "/v2/account")["equity"])
+                        skill.poll(eq2, et_now(), risk_left(api, start_eq, eq2))
                     except Exception as e:  # noqa: BLE001
                         log(f"skill poll: {e}")
         time.sleep(poll)
@@ -236,6 +263,8 @@ def check(log=print):
     log(f"CHECK account ...{str(a.get('account_number', ''))[-4:]} status {a.get('status')} equity ${float(a['equity']):,.2f} "
         f"cash ${float(a['cash']):,.2f} buying power ${float(a['buying_power']):,.2f} shorting {a.get('shorting_enabled')} "
         f"positions {[p['symbol'] for p in pos] or 'none'} long-term ETFs present: {any(p['symbol'] in LONG_TERM for p in pos)}")
+    eq = float(a["equity"])
+    log(f"CHECK daily risk budget: ${risk_left(api, float(a.get('last_equity') or eq), eq):,.0f} of ${DAY_RISK_USD:,.0f} free")
     from .skill_trader import replay_day
     cal = api.call("GET", f"/v2/calendar?start={(et_now().date() - timedelta(days=7)).isoformat()}&end={(et_now().date() - timedelta(days=1)).isoformat()}")
     if cal:
@@ -292,7 +321,7 @@ def write_note(st, today):
          "> [!success] Real orders in a separate Alpaca paper account",
          "> Two strategies, one account: the Opening Range Breakout rules from [[11 - Day Trading Simulator]] on SPY and QQQ, "
          "and the **day-trader-skill pack** ([[14 - Skill Pack Day Trader]]: scanner → exit plan → news → time machine → sizing) on 30 liquid stocks. "
-         "Real bracket orders, practice money. Flat every day by 15:55 New York.", "",
+         "Real bracket orders, practice money. Risk budget: **$1,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York.", "",
          "## Account", "", "| | |", "|---|---|",
          f"| Started | {st.get('start')} with ${s0:,.2f} |",
          f"| **Equity** | **${eq:,.2f}** ({(eq / s0 - 1) * 100:+.2f}%) |" if eq else "| Equity | — |",
