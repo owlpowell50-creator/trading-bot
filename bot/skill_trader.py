@@ -7,7 +7,7 @@ Pipeline, every poll from 9:50 to 11:30 New York, in the SAME separate Alpaca pa
   3. trader-news     - its keyword tags on today's headlines (Alpaca news feed); skip earnings/halt/deal/risk news
   4. trader-timemachine - its 10,000-replay Monte Carlo on the stock's own last ~40 sessions + the history replay;
                        only "Leans/Strongly toward the target" verdicts pass
-  5. trader-budget / trader-risk rules - 0.25% of equity at risk, max 15% of equity per position, max 3 trades a
+  5. trader-budget / trader-risk rules - $500 at risk per trade, position at most 1x the account, max 3 trades a
                        day, reward/risk >= 1, stop required, no entries after 11:30, flat by 15:55
   6. bracket order (market entry + stop + target) placed by our own paper-only code.
 
@@ -30,7 +30,7 @@ PACK = ROOT / "vendor" / "day-trader-skill"
 WATCH = ["AAPL", "MSFT", "NVDA", "AMZN", "META", "GOOGL", "TSLA", "AMD", "AVGO", "NFLX", "JPM", "BAC", "XOM",
          "COST", "WMT", "LLY", "UNH", "V", "MA", "ORCL", "CRM", "ADBE", "INTC", "MU", "QCOM", "PLTR", "UBER",
          "DIS", "BA", "CAT"]
-RULES = {"risk_pct": 0.0025, "max_position_pct": 0.15, "max_trades_per_day": 3, "min_reward_risk": 1.0,
+RULES = {"risk_usd": 500.0, "max_position_x": 1.0, "max_trades_per_day": 3, "min_reward_risk": 1.0,
          "target_r": 2.0, "no_entries_before": "09:50", "no_entries_after": "11:30", "flat_by": "15:55",
          "replays": 10000, "seed": 19, "skip_news_tags": {"earnings", "halt", "deal", "risk"}}
 PREFIX = "dts"
@@ -158,8 +158,8 @@ def evaluate(api, sym, today_bars, hist_bars, day, now_utc, equity, mods=None, m
         d["skip"] = "time machine: " + doc["verdict"].split(":")[0].lower(); return d
     if (target - entry) / risk < RULES["min_reward_risk"]:
         d["skip"] = "reward/risk too low"; return d
-    budget = equity * RULES["risk_pct"] if max_risk is None else min(equity * RULES["risk_pct"], max_risk)
-    qty = min(math.floor(budget / risk), math.floor(equity * RULES["max_position_pct"] / entry))
+    budget = RULES["risk_usd"] if max_risk is None else min(RULES["risk_usd"], max_risk)
+    qty = min(math.floor(budget / risk), math.floor(equity * RULES["max_position_x"] / entry))
     if qty < 1:
         d["skip"] = "size rounds to zero"; return d
     d.update(qty=qty, risk=round(qty * risk, 2))

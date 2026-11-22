@@ -7,7 +7,7 @@ Rules - identical to the simulator in daytrade.py and 'Day Traders/12':
   entry           first completed 5-minute bar closing above the high (long) / below the low (short)
                   -> market order with an attached bracket: stop at the other side of the range,
                   take-profit at 1.5 x range height; no new entries after 15:00
-  size            risk 0.5% of the day-trading account per trade, position <= 20% of it
+  size            risk $500 per trade, position <= 2x the account
   limits          one trade per symbol per day; $2,000 of risk a day: losses so far + what the open
                   trades could still lose at their stops never exceeds $2,000, new trades are sized to fit
   flat            every open order cancelled and every position closed at 15:55
@@ -28,7 +28,7 @@ from datetime import date, datetime, timedelta, timezone
 
 from zoneinfo import ZoneInfo
 
-from .daytrade import MAX_POS, RISK, SYMBOLS, TARGET_X
+from .daytrade import SYMBOLS, TARGET_X
 from .data import ROOT
 from .vault import FM, _write
 
@@ -37,6 +37,8 @@ PAPER = "https://paper-api.alpaca.markets"
 DATA = "https://data.alpaca.markets"
 STATE = ROOT / "state" / "daytrade_live.json"
 DAY_RISK_USD = 2000.0        # the most the day trader may lose in one day (both strategies together)
+TRADE_RISK_USD = 500.0       # risk per trade: what one trade loses if its stop is hit
+MAX_POS_X = 2.0              # one position at most 2x the account (paper margin; intraday buying power is 4x)
 MIN_TRADE_RISK = 50.0        # don't open a trade that can only risk less than this
 LONG_TERM = {"VOO", "IEFA", "IEF", "TLT", "VNQ", "GLDM", "PDBC", "SGOV"}
 
@@ -132,8 +134,8 @@ def plan(bars, equity, max_risk=None):
     stop = lo if side == "buy" else hi
     target = ref + TARGET_X * height if side == "buy" else ref - TARGET_X * height
     per = abs(ref - stop)
-    budget = equity * RISK if max_risk is None else min(equity * RISK, max_risk)
-    qty = min(math.floor(budget / per), math.floor(equity * MAX_POS / ref)) if per > 0 else 0
+    budget = TRADE_RISK_USD if max_risk is None else min(TRADE_RISK_USD, max_risk)
+    qty = min(math.floor(budget / per), math.floor(equity * MAX_POS_X / ref)) if per > 0 else 0
     if qty < 1:
         return {"skip": "size rounds to zero"}
     return {"side": side, "qty": qty, "ref": ref, "stop": round(stop, 2), "target": round(target, 2),
@@ -321,7 +323,7 @@ def write_note(st, today):
          "> [!success] Real orders in a separate Alpaca paper account",
          "> Two strategies, one account: the Opening Range Breakout rules from [[11 - Day Trading Simulator]] on SPY and QQQ, "
          "and the **day-trader-skill pack** ([[14 - Skill Pack Day Trader]]: scanner → exit plan → news → time machine → sizing) on 30 liquid stocks. "
-         "Real bracket orders, practice money. Risk budget: **$2,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York.", "",
+         "Real bracket orders, practice money. Risk: **$500 per trade, $2,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York.", "",
          "## Account", "", "| | |", "|---|---|",
          f"| Started | {st.get('start')} with ${s0:,.2f} |",
          f"| **Equity** | **${eq:,.2f}** ({(eq / s0 - 1) * 100:+.2f}%) |" if eq else "| Equity | — |",
