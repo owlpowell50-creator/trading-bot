@@ -54,10 +54,10 @@ def _ny(ts: str) -> datetime:
     return t.astimezone(NY) if NY else t - timedelta(hours=5)
 
 
-def fetch_bars(http: Callable, day_from: str, day_to: str) -> Dict[str, List[dict]]:
+def fetch_bars(http: Callable, day_from: str, day_to: str, feed: str = "iex") -> Dict[str, List[dict]]:
     """5-minute IEX bars for SYMBOLS between two dates (inclusive), all pages."""
     out: Dict[str, List[dict]] = {s: [] for s in SYMBOLS}
-    q = {"symbols": ",".join(SYMBOLS), "timeframe": "5Min", "feed": "iex", "adjustment": "raw",
+    q = {"symbols": ",".join(SYMBOLS), "timeframe": "5Min", "feed": feed, "adjustment": "raw",
          "start": f"{day_from}T12:00:00Z", "end": f"{(date.fromisoformat(day_to) + timedelta(days=1)).isoformat()}T02:00:00Z",
          "limit": "10000", "sort": "asc"}
     token = None

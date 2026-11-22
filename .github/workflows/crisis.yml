@@ -1,0 +1,29 @@
+# Crisis simulation: the long-term bot through every major crash since 1987 vs the S&P 500, Dow and Nasdaq,
+# plus the day trader on the crashes Alpaca has 5-minute data for. Run by hand (Actions -> crisis -> Run workflow).
+name: crisis
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Simulate
+        env:
+          REFRESH_INDEXES: "1"
+          APCA_DT_KEY_ID: ${{ secrets.APCA_DT_KEY_ID }}
+          APCA_DT_SECRET_KEY: ${{ secrets.APCA_DT_SECRET_KEY }}
+        run: python tools/crisis_sim.py
+      - name: Commit
+        run: |
+          git config user.name "trading-bot"; git config user.email "trading-bot@users.noreply.github.com"
+          git add state/crisis.json data/indexes.csv "15 - Crisis Simulation.md"
+          git diff --cached --quiet && exit 0
+          git commit -m "Crisis simulation $(date -u +%F)"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done

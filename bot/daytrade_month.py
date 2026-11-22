@@ -18,8 +18,9 @@ from .vault import FM, _write
 STATE = ROOT / "state" / "daytrade_month.json"
 
 
-def simulate(http, start: str, end: str, capital: float = 100_000.0, day_loss_pct: float = 0.02) -> dict:
-    bars = fetch_bars(http, start, end)
+def simulate(http, start: str, end: str, capital: float = 100_000.0, day_loss_pct: float = 0.02,
+             feed: str = "iex", save: bool = True) -> dict:
+    bars = fetch_bars(http, start, end, feed)
     per = {s: session_bars(b) for s, b in bars.items()}
     days = sorted(set().union(*[set(d) for d in per.values()]))
     eq, trades, out = capital, [], []
@@ -41,8 +42,9 @@ def simulate(http, start: str, end: str, capital: float = 100_000.0, day_loss_pc
                 t.update(date=d, n=len(trades) + 1); trades.append(t); eq += t["pnl"]; n += 1
         out.append({"date": d, "equity": round(eq, 2), "trades": n, "pnl": round(eq - start_eq, 2)})
     st = {"start": start, "end": end, "capital": capital, "equity": round(eq, 2), "trades": trades, "days": out,
-          "source": "Alpaca market data, IEX feed, 5-minute bars"}
-    STATE.write_text(json.dumps(st, indent=1))
+          "source": f"Alpaca market data, {feed.upper()} feed, 5-minute bars"}
+    if save:
+        STATE.write_text(json.dumps(st, indent=1))
     return st
 
 
