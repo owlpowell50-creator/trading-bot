@@ -30,7 +30,7 @@ tags:
 
 ## Shared guard rails
 
-- One shared budget of **$1,000 of risk a day** for both strategies: today's losses so far plus what every open trade would lose at its stop can never add up to more than $1,000. New trades are shrunk to fit what is left; once it is used up, nothing new opens until a trade closes in profit.
+- One shared budget of **$2,000 of risk a day** for both strategies: today's losses so far plus what every open trade would lose at its stop can never add up to more than $2,000. New trades are shrunk to fit what is left; once it is used up, nothing new opens until a trade closes in profit.
 - Paper account only, and it refuses to trade if the long-term portfolio's ETFs show up in the account.
 - Long only (the pack's v2 is buy-only).
 - The pack's own `trader-broker` asks a human "yes" for every order; the bot doesn't use it — it places its own paper orders, which is why this runs on practice money only.

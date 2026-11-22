@@ -8,8 +8,8 @@ Rules - identical to the simulator in daytrade.py and 'Day Traders/12':
                   -> market order with an attached bracket: stop at the other side of the range,
                   take-profit at 1.5 x range height; no new entries after 15:00
   size            risk 0.5% of the day-trading account per trade, position <= 20% of it
-  limits          one trade per symbol per day; $1,000 of risk a day: losses so far + what the open
-                  trades could still lose at their stops never exceeds $1,000, new trades are sized to fit
+  limits          one trade per symbol per day; $2,000 of risk a day: losses so far + what the open
+                  trades could still lose at their stops never exceeds $2,000, new trades are sized to fit
   flat            every open order cancelled and every position closed at 15:55
 
 Keys: APCA_DT_KEY_ID / APCA_DT_SECRET_KEY (a second Alpaca paper account). The code only ever
@@ -36,7 +36,7 @@ NY = ZoneInfo("America/New_York")
 PAPER = "https://paper-api.alpaca.markets"
 DATA = "https://data.alpaca.markets"
 STATE = ROOT / "state" / "daytrade_live.json"
-DAY_RISK_USD = 1000.0        # the most the day trader may lose in one day (both strategies together)
+DAY_RISK_USD = 2000.0        # the most the day trader may lose in one day (both strategies together)
 MIN_TRADE_RISK = 50.0        # don't open a trade that can only risk less than this
 LONG_TERM = {"VOO", "IEFA", "IEF", "TLT", "VNQ", "GLDM", "PDBC", "SGOV"}
 
@@ -141,7 +141,7 @@ def plan(bars, equity, max_risk=None):
 
 
 def risk_left(api: Alpaca, start_eq: float, equity: float) -> float:
-    """$ of today's $1,000 still unused: DAY_RISK_USD - today's loss so far (open trades marked to market)
+    """$ of today's $2,000 still unused: DAY_RISK_USD - today's loss so far (open trades marked to market)
     - what the open positions would still lose if every stop were hit."""
     used = max(0.0, start_eq - equity)
     pos = api.call("GET", "/v2/positions")
@@ -219,7 +219,7 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
             left = risk_left(api, start_eq, eq)
             if left < MIN_TRADE_RISK:
                 if "loss" not in skipped:
-                    log(f"daily $1,000 risk used (P&L {eq - start_eq:+,.2f}, ${max(left, 0):,.0f} left) - "
+                    log(f"daily $2,000 risk used (P&L {eq - start_eq:+,.2f}, ${max(left, 0):,.0f} left) - "
                         "no new trades until it frees up"); skipped.add("loss")
             else:
                 skipped.discard("loss")
@@ -321,7 +321,7 @@ def write_note(st, today):
          "> [!success] Real orders in a separate Alpaca paper account",
          "> Two strategies, one account: the Opening Range Breakout rules from [[11 - Day Trading Simulator]] on SPY and QQQ, "
          "and the **day-trader-skill pack** ([[14 - Skill Pack Day Trader]]: scanner → exit plan → news → time machine → sizing) on 30 liquid stocks. "
-         "Real bracket orders, practice money. Risk budget: **$1,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York.", "",
+         "Real bracket orders, practice money. Risk budget: **$2,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York.", "",
          "## Account", "", "| | |", "|---|---|",
          f"| Started | {st.get('start')} with ${s0:,.2f} |",
          f"| **Equity** | **${eq:,.2f}** ({(eq / s0 - 1) * 100:+.2f}%) |" if eq else "| Equity | — |",
