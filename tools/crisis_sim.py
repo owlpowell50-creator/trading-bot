@@ -237,7 +237,7 @@ def write_note(doc):
     if dt.get("skipped"):
         L.append(f"Not run: {dt['skipped']}.")
     else:
-        L += ["$100,000 practice account, the live day trader's entry rules with a 2% daily loss limit (the live bot now uses a $2,000-a-day risk budget), flat every night. "
+        L += ["$100,000 practice account, the live day trader's entry rules with a 2% daily loss limit (the live bot now uses a $5,000-a-day risk budget), flat every night. "
               "Alpaca SIP 5-minute bars, so only crises from 2016 on.", "",
               "| Crisis | Return | Worst fall | Trades | Winners | Profit factor | S&P 500 same window |", "|---|---|---|---|---|---|---|"]
         for c in dt.get("crises", []):
