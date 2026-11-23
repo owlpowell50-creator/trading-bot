@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-20
+updated: 2026-11-23
 tags:
   - type/replay
   - department/trading
@@ -18,15 +18,15 @@ tags:
 > [!note] This is a replay, not live trading
 > The current rules run on real market prices from the past year, starting with 10,000 on 2025-11-03. Costs included. The live paper account is in [[06 - One-Month Trial]] and [[07 - Trade Log]].
 
-> [!success] Result: bot +14.1% (worst fall -9.2%) vs S&P 500 +4.6% (worst fall -9.2%)
+> [!success] Result: bot +15.6% (worst fall -10.4%) vs S&P 500 +7.1% (worst fall -11.5%)
 
 ```mermaid
 xychart-beta
     title "10,000 invested: bot vs S&P 500"
-    x-axis ["2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-11-20"]
+    x-axis ["2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-11-23"]
     y-axis "Value" 9369 --> 12666
-    line [10000.0, 10097.5, 10347.0, 10751.1, 11527.1, 11460.9, 11880.9, 12011.2, 11509.1, 11978.1, 12391.5, 12369.2, 12294.8, 11414.3]
-    line [10000.0, 9955.1, 10027.1, 10206.7, 10074.2, 9643.4, 10606.0, 11163.7, 11003.9, 11179.6, 11240.3, 11300.9, 11125.0, 10458.5]
+    line [10000.0, 10097.5, 10347.0, 10751.1, 11527.1, 11460.9, 11880.9, 12011.2, 11509.1, 11978.1, 12391.5, 12369.2, 12294.8, 11564.2]
+    line [10000.0, 9955.1, 10027.1, 10206.7, 10074.2, 9643.4, 10606.0, 11163.7, 11003.9, 11179.6, 11240.3, 11300.9, 11125.0, 10708.4]
 ```
 *Lines: first = **Bot** · second = **S&P 500***
 
@@ -101,6 +101,6 @@ Until the next rebalance: **bot +3.2%** vs S&P 500 +0.7%
 | 🔴 SELL | **VOO** (US stocks (S&P 500)) | -5.2 pts | 39.0% |
 
 Holdings: VOO 39%, IEFA 33%, PDBC 28%
-Until the next rebalance: **bot -7.9%** vs S&P 500 -7.0%
+Until the next rebalance: **bot -6.7%** vs S&P 500 -4.7%
 
 Back to [[00 - Bot Dashboard]] · Full 30-year evidence: [[03 - Backtest Report]]

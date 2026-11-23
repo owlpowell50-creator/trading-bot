@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-20
+updated: 2026-11-23
 tags:
   - type/live-account
   - department/trading
@@ -16,7 +16,7 @@ tags:
 
 # 10 - Live Paper Account
 
-> [!success] Real data from Alpaca (ALPACA-PAPER) — pulled 2026-11-20 15:58 UTC
+> [!success] Real data from Alpaca (ALPACA-PAPER) — pulled 2026-11-23 16:08 UTC
 > Every number on this page comes from the broker's API: the trades really happened in Alpaca's paper-trading account, at real market prices. Paper means the $100,000 is practice money, not your savings.
 
 ## Account
@@ -25,21 +25,21 @@ tags:
 |---|---|
 | Account | •••PJMU · ACTIVE · USD |
 | Started with | $100,000.00 on 2026-11-12 |
-| **Equity now** | **$93,691.20** |
-| Change since start | -6,308.80 (-6.31%) |
-| Change today | -1,235.75 (-1.30%) |
-| Invested | $93,191.18 |
+| **Equity now** | **$95,020.75** |
+| Change since start | -4,979.25 (-4.98%) |
+| Change today | +2,502.80 (+2.71%) |
+| Invested | $94,520.73 |
 | Cash | $500.02 |
-| Unrealised P&L (open positions) | -6,308.79 |
+| Unrealised P&L (open positions) | -4,979.24 |
 | Realised P&L (closed lots) | +0.00 |
 
 ## Positions
 
 | ETF | What it is | Shares | Avg cost | Price | Value | Weight | P&L $ | P&L % | Today |
 |---|---|---|---|---|---|---|---|---|---|
-| **VOO** | US stocks (S&P 500) | 55.960 | $698.94 | $650.07 | $36,378.19 | 38.8% | -2,734.86 | -6.99% | -1.21% |
-| **IEFA** | Developed ex-US stocks | 380.590 | $97.05 | $90.70 | $34,521.39 | 36.8% | -2,414.84 | -6.54% | -1.36% |
-| **PDBC** | Commodities | 1,280.759 | $18.31 | $17.41 | $22,291.60 | 23.8% | -1,159.09 | -4.94% | -1.39% |
+| **VOO** | US stocks (S&P 500) | 55.960 | $698.94 | $665.81 | $37,259.00 | 39.2% | -1,854.05 | -4.74% | +4.76% |
+| **IEFA** | Developed ex-US stocks | 380.590 | $97.05 | $91.98 | $35,008.54 | 36.8% | -1,927.69 | -5.22% | +2.73% |
+| **PDBC** | Commodities | 1,280.759 | $18.31 | $17.38 | $22,253.18 | 23.4% | -1,197.51 | -5.11% | -0.54% |
 
 ## Ledger
 
@@ -62,16 +62,18 @@ Every filled order in the account, oldest first (from Alpaca's order history).
 | 2026-11-18 | $97,116.30 | -0.91% | -2.88% | -2.88% |
 | 2026-11-19 | $96,118.20 | -1.03% | -3.88% | -3.88% |
 | 2026-11-20 | $94,926.95 | -1.24% | -5.07% | -5.07% |
+| 2026-11-21 | $92,517.95 | -2.54% | -7.48% | -7.48% |
+| 2026-11-23 | $95,020.75 | +2.71% | -4.98% | -4.98% |
 
 ## Scorecard
 
 | Metric | Target | Actual |
 |---|---|---|
-| Total return | — | -5.07% |
-| Max drawdown | better than −25% (halt level) | -5.07% |
+| Total return | — | -4.98% |
+| Max drawdown | better than −25% (halt level) | -7.48% |
 | Sharpe (annualised) | > 0.5 | needs 20+ days |
-| Best / worst day | — | -0.15% / -1.67% |
-| Trading days tracked | — | 7 |
+| Best / worst day | — | +2.71% / -2.54% |
+| Trading days tracked | — | 9 |
 | Filled orders | — | 3 |
 
 Updated automatically after every bot run. See also [[00 - Bot Dashboard]], [[07 - Trade Log]], [[06 - One-Month Trial]].

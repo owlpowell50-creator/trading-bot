@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-20
+updated: 2026-11-23
 tags:
   - type/dashboard
   - department/trading
@@ -15,36 +15,36 @@ tags:
 
 # Trading Bot — Dashboard
 
-> [!info] 🤖 Bot is ACTIVE — last run 2026-11-20 at 15:58: **HOLD**
+> [!info] 🤖 Bot is ACTIVE — last run 2026-11-23 at 16:08: **HOLD**
 > No rebalance due (signal of 2026-10-30 already acted on).
 > Next scheduled rebalance: **2026-12-01** (first trading day of the month). Every other weekday it checks prices and risk, and writes a journal.
 
-**Mode:** `alpaca-paper` · **Region:** `us` · **Strategy:** `CORE` · **Data through:** 2026-11-20
+**Mode:** `alpaca-paper` · **Region:** `us` · **Strategy:** `CORE` · **Data through:** 2026-11-23
 
 ## Account
 
 | | |
 |---|---|
-| Equity | 93,690 |
+| Equity | 95,021 |
 | Started with | 100,000 |
-| Return since start | -6.3% |
+| Return since start | -5.0% |
 | Peak | 99,989 |
-| Drawdown | -6.3% (halt at -25%) |
+| Drawdown | -5.0% (halt at -25%) |
 
 ## Holdings now
 
 | Asset | Weight | Instrument |
 |---|---|---|
-| US stocks (S&P 500) | 38.8% | VOO (US-listed) |
+| US stocks (S&P 500) | 39.2% | VOO (US-listed) |
 | Developed ex-US stocks | 36.8% | IEFA (US-listed) |
-| Commodities | 23.8% | PDBC (US-listed) |
+| Commodities | 23.4% | PDBC (US-listed) |
 | Cash (T-bills) | 0.5% | SGOV (US-listed) |
 
 ```mermaid
 pie showData title What the bot holds now
-    "US stocks (S&P 500) (VOO)" : 38.8
+    "US stocks (S&P 500) (VOO)" : 39.2
     "Developed ex-US stocks (IEFA)" : 36.8
-    "Commodities (PDBC)" : 23.8
+    "Commodities (PDBC)" : 23.4
     "Cash (T-bills) (SGOV)" : 0.5
 ```
 
@@ -52,6 +52,7 @@ pie showData title What the bot holds now
 
 | Date | Status | Equity |
 |---|---|---|
+| [[2026-11-23]] | HOLD | 95,021 |
 | [[2026-11-20]] | HOLD | 93,690 |
 | [[2026-11-19]] | HOLD | 95,889 |
 | [[2026-11-18]] | HOLD | 96,244 |
@@ -65,9 +66,9 @@ pie showData title What the bot holds now
 ```mermaid
 xychart-beta
     title "Paper account value"
-    x-axis ["11-12", "11-13", "11-16", "11-17", "11-18", "11-19", "11-20"]
+    x-axis ["11-12", "11-13", "11-16", "11-17", "11-18", "11-19", "11-20", "11-23"]
     y-axis "Value" 93060 --> 100619
-    line [99989.1, 99470.6, 99230.9, 97159.3, 96244.1, 95888.9, 93690.1]
+    line [99989.1, 99470.6, 99230.9, 97159.3, 96244.1, 95888.9, 93690.1, 95020.7]
 ```
 
 ## Notes

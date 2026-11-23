@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-20
+updated: 2026-11-23
 tags:
   - type/trade-log
   - department/trading
