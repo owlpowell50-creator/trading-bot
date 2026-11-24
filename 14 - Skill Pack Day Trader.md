@@ -17,7 +17,7 @@ tags:
 > [!info] A second day-trading strategy, running next to the SPY/QQQ breakout
 > The open-source **day-trader-skill** pack ([github.com/Jakeschincariol/day-trader-skill](https://github.com/Jakeschincariol/day-trader-skill), MIT licence) is copied into the bot at `vendor/day-trader-skill` and its tools run as a pipeline inside the GitHub day-trader job, in the same separate Alpaca paper account. Results land in [[12 - Live Day Trading]] (ledger, *By strategy* and *Skill pack decisions*).
 
-## The pipeline (every 20 seconds, 9:50 to 11:30 New York)
+## The pipeline (every 20 seconds, 9:50 to 10:45 New York)
 
 | Step | Pack tool | What the bot does with it |
 |---|---|---|
@@ -25,7 +25,7 @@ tags:
 | 2 Plan | `trader-exit` defaults | Stop at the opening-range midpoint, target 2R. |
 | 3 News | `trader-news` keyword tags | Today's headlines (Alpaca news feed). Earnings, halt, deal or risk news → skip. |
 | 4 Odds | `trader-timemachine` | 10,000 replays on the stock's own last ~40 sessions (seed 19), plus the same rule replayed on each of those days. Only *Leans/Strongly toward the target* with average R above 0 passes. |
-| 5 Size | `trader-budget` / `trader-risk` rules | $500 at risk per trade, at most 1× the account in one stock, max 3 trades a day, reward/risk ≥ 1, stop required, no entries after 11:30. |
+| 5 Size | `trader-budget` / `trader-risk` rules | $500 at risk per trade, at most 1× the account in one stock, max 3 trades a day, reward/risk ≥ 1, stop required, no entries after 10:45. |
 | 6 Order | bot's own paper code | Market entry + stop + target as one bracket order (`dts-…` order ids). Flat by 15:55 with everything else. |
 
 ## Shared guard rails

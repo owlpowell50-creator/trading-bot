@@ -1,11 +1,18 @@
 # Live (paper) day-trading in a SEPARATE Alpaca paper account: Opening Range Breakout on SPY/QQQ
 # plus the day-trader-skill pack pipeline (vendor/day-trader-skill) on 30 liquid stocks.
-# Two cron lines because of daylight saving; the script only proceeds when it is 09:xx in New York.
+#
+# Kept short to stay inside GitHub's free Actions minutes (private repo: 2,000 min/month):
+#   morning job   09:35 -> 10:45 New York   (opening range, breakouts, skill-pack entries)
+#   close job     15:52 -> 15:57 New York   (flatten at 15:55, report, commit)
+# Open trades in between are protected by their bracket orders, which sit at the broker.
+# Two cron lines per job because of daylight saving; the script only proceeds in the right New York hour.
 name: Day trader
 on:
   schedule:
-    - cron: "10 13 * * 1-5"
-    - cron: "10 14 * * 1-5"
+    - cron: "35 13 * * 1-5"
+    - cron: "35 14 * * 1-5"
+    - cron: "52 19 * * 1-5"
+    - cron: "52 20 * * 1-5"
   workflow_dispatch:
     inputs:
       check:
@@ -19,21 +26,20 @@ concurrency:
   cancel-in-progress: false
 jobs:
   morning:
+    if: github.event_name == 'workflow_dispatch' || endsWith(github.event.schedule, '13 * * 1-5') || endsWith(github.event.schedule, '14 * * 1-5')
     runs-on: ubuntu-latest
-    timeout-minutes: 300
-    outputs:
-      active: ${{ steps.dt.outputs.active }}
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Trade the open (until 12:45 New York)
+      - name: Trade the open (until 10:45 New York)
         id: dt
         env:
           APCA_DT_KEY_ID: ${{ secrets.APCA_DT_KEY_ID }}
           APCA_DT_SECRET_KEY: ${{ secrets.APCA_DT_SECRET_KEY }}
-        run: python run.py daytrade-live --until 12:45 ${{ github.event_name == 'schedule' && '--gate' || '' }} ${{ github.event.inputs.check == 'yes' && '--check' || '' }}
+        run: python run.py daytrade-live --until 10:45 ${{ github.event_name == 'schedule' && '--gate' || '' }} ${{ github.event.inputs.check == 'yes' && '--check' || '' }}
       - name: Save the skill pack's decisions
         if: steps.dt.outputs.active == '1'
         run: |
@@ -42,24 +48,23 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "Day trader morning decisions $(date -u +%F)"
           for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
-  afternoon:
-    needs: morning
-    if: needs.morning.outputs.active == '1'
+  close:
+    if: endsWith(github.event.schedule, '19 * * 1-5') || endsWith(github.event.schedule, '20 * * 1-5')
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Manage, flatten at 15:55, write the report
+      - name: Flatten at 15:55 and write the report
+        id: dt
         env:
           APCA_DT_KEY_ID: ${{ secrets.APCA_DT_KEY_ID }}
           APCA_DT_SECRET_KEY: ${{ secrets.APCA_DT_SECRET_KEY }}
-        run: python run.py daytrade-live --until 15:57 --flatten 15:55 --report
+        run: python run.py daytrade-live --until 15:57 --flatten 15:55 --gate-hour 15 --report
       - name: Save the report to the repo
+        if: steps.dt.outputs.active == '1'
         run: |
           git config user.name "trading-bot"; git config user.email "trading-bot@users.noreply.github.com"
           git add state/daytrade_live.json state/benchmarks.json "12 - Live Day Trading.md" 2>/dev/null || true

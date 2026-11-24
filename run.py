@@ -500,12 +500,12 @@ def cmd_daytrade_live(args):
     from bot import daytrade_live as dl
     if args.check:
         dl.check(); return 0
-    active = dl.run(args.until, args.flatten, gate=args.gate)
+    active = dl.run(args.until, args.flatten, gate=(args.gate_hour or args.gate))
     out = os.environ.get("GITHUB_OUTPUT")
     if out:
         with open(out, "a") as f:
             f.write(f"active={'1' if active else '0'}\n")
-    if args.report:
+    if args.report and active:
         dl.report()
     return 0
 
@@ -543,7 +543,7 @@ def main():
     tr.add_argument("--no-download", action="store_true")
     sub.add_parser("test")
     dl = sub.add_parser("daytrade-live", help="run the live (paper) opening-range day-trader")
-    dl.add_argument("--until", default="15:57"); dl.add_argument("--flatten"); dl.add_argument("--gate", action="store_true")
+    dl.add_argument("--until", default="15:57"); dl.add_argument("--flatten"); dl.add_argument("--gate", action="store_true"); dl.add_argument("--gate-hour", type=int)
     dl.add_argument("--report", action="store_true"); dl.add_argument("--check", action="store_true")
     dm = sub.add_parser("daytrade-month", help="simulate one month of the live day-trader on real 5-minute bars")
     dm.add_argument("--start"); dm.add_argument("--end"); dm.add_argument("--capital", type=float, default=100000.0)

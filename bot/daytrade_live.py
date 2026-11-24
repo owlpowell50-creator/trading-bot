@@ -183,7 +183,8 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
             "(keys of a SECOND Alpaca paper account) as GitHub secrets.")
         return False
     now = et_now(); day = now.date()
-    if gate and now.hour != 9:
+    gate_hour = 9 if gate is True else gate
+    if gate and now.hour != gate_hour:
         log(f"{now:%H:%M} New York - not this trigger's hour (daylight-saving twin), exiting")
         return False
     clock = api.call("GET", "/v2/clock")
@@ -199,7 +200,7 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
     equity = float(acct["equity"]); start_eq = float(acct.get("last_equity") or equity)
     log(f"day-trading account equity ${equity:,.2f}; running until {until} New York")
     end = at(day, until); flat_t = at(day, flatten_at) if flatten_at else None
-    while et_now() < at(day, "09:45") + timedelta(seconds=30):
+    while et_now() < at(day, "09:45") + timedelta(seconds=30) and not flatten_at:
         time.sleep(15)
     done = {o["symbol"] for o in todays_orb_orders(api, day)}
     skipped = set()

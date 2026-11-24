@@ -1,6 +1,6 @@
 """Second day-trading strategy: the day-trader-skill pack (vendor/day-trader-skill, MIT) run on autopilot.
 
-Pipeline, every poll from 9:50 to 11:30 New York, in the SAME separate Alpaca paper account as the SPY/QQQ ORB:
+Pipeline, every poll from 9:50 to 10:45 New York, in the SAME separate Alpaca paper account as the SPY/QQQ ORB:
   1. trader-scanner  - its orb_hit() on today's 5-minute bars of a liquid watchlist (first close above the
                        15-minute opening-range high)
   2. trader-exit     - its default plan: stop at the opening-range midpoint, target 2R
@@ -8,7 +8,7 @@ Pipeline, every poll from 9:50 to 11:30 New York, in the SAME separate Alpaca pa
   4. trader-timemachine - its 10,000-replay Monte Carlo on the stock's own last ~40 sessions + the history replay;
                        only "Leans/Strongly toward the target" verdicts pass
   5. trader-budget / trader-risk rules - $500 at risk per trade, position at most 1x the account, max 3 trades a
-                       day, reward/risk >= 1, stop required, no entries after 11:30, flat by 15:55
+                       day, reward/risk >= 1, stop required, no entries after 10:45, flat by 15:55
   6. bracket order (market entry + stop + target) placed by our own paper-only code.
 
 The pack's own trader-broker asks a human "yes" for every order by design; this bot does not use it.
@@ -31,7 +31,7 @@ WATCH = ["AAPL", "MSFT", "NVDA", "AMZN", "META", "GOOGL", "TSLA", "AMD", "AVGO",
          "COST", "WMT", "LLY", "UNH", "V", "MA", "ORCL", "CRM", "ADBE", "INTC", "MU", "QCOM", "PLTR", "UBER",
          "DIS", "BA", "CAT"]
 RULES = {"risk_usd": 500.0, "max_position_x": 1.0, "max_trades_per_day": 3, "min_reward_risk": 1.0,
-         "target_r": 2.0, "no_entries_before": "09:50", "no_entries_after": "11:30", "flat_by": "15:55",
+         "target_r": 2.0, "no_entries_before": "09:50", "no_entries_after": "10:45", "flat_by": "15:55",
          "replays": 10000, "seed": 19, "skip_news_tags": {"earnings", "halt", "deal", "risk"}}
 PREFIX = "dts"
 
