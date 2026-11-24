@@ -203,6 +203,14 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
                            "Day trading needs a separate paper account - refusing to trade.")
     equity = float(acct["equity"]); start_eq = float(acct.get("last_equity") or equity)
     log(f"day-trading account equity ${equity:,.2f}; running until {until} New York")
+    if pos and not flatten_at and not todays_orb_orders(api, day, both=True):
+        # a day trader must start flat: anything still open was left over from an earlier session
+        log("left-over positions from an earlier session: " + ", ".join(f"{p['symbol']} {p['qty']}" for p in pos) + " - closing them first")
+        while not api.call("GET", "/v2/clock").get("is_open"):
+            time.sleep(20)
+        flatten(api, log)
+        time.sleep(5)
+        acct = api.call("GET", "/v2/account"); equity = float(acct["equity"])
     end = at(day, until); flat_t = at(day, flatten_at) if flatten_at else None
     while et_now() < at(day, "09:45") + timedelta(seconds=30) and not flatten_at:
         time.sleep(15)
@@ -293,6 +301,11 @@ def report(today: str | None = None, log=print):
         by_sym.setdefault(f["symbol"], []).append(f)
     st["trades"] = [t for t in st["trades"] if t["date"] != day.isoformat()]
     for s, fs in by_sym.items():
+        k = next((n for n, f in enumerate(fs) if f.get("order_id") in orders), None)
+        if k is None:
+            log(f"{s}: fills today are not from today's entries (a left-over position being closed) - not counted as a trade")
+            continue
+        fs = fs[k:]
         entry = fs[0]; side = entry["side"]; q = sum(float(f["qty"]) for f in fs if f["side"] == side)
         ein = sum(float(f["qty"]) * float(f["price"]) for f in fs if f["side"] == side) / q
         out = [f for f in fs if f["side"] != side]
