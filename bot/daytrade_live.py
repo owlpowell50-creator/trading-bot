@@ -38,6 +38,7 @@ DATA = "https://data.alpaca.markets"
 STATE = ROOT / "state" / "daytrade_live.json"
 DAY_RISK_USD = 5000.0        # the most the day trader may lose in one day (both strategies together)
 TRADE_RISK_USD = 500.0       # risk per trade: what one trade loses if its stop is hit
+CORRELATED_RISK_FACTOR = 0.5  # second same-direction SPY/QQQ trade on the same day gets half the risk
 MAX_POS_X = 2.0              # one position at most 2x the account (paper margin; intraday buying power is 4x)
 MIN_TRADE_RISK = 50.0        # don't open a trade that can only risk less than this
 LONG_TERM = {"VOO", "IEFA", "IEF", "TLT", "VNQ", "GLDM", "PDBC", "SGOV"}
@@ -215,6 +216,7 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
     while et_now() < at(day, "09:45") + timedelta(seconds=30) and not flatten_at:
         time.sleep(15)
     done = {o["symbol"] for o in todays_orb_orders(api, day)}
+    sides = {o["symbol"]: ("buy" if "-L-" in (o.get("client_order_id") or "") else "sell") for o in todays_orb_orders(api, day)}
     skipped = set()
     skill = None
     if skills:
@@ -250,6 +252,13 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
                         continue
                     if "skip" in p:
                         log(f"{s}: {p['skip']}"); skipped.add(s); continue
+                    twin = [x for x, sd in sides.items() if x != s and sd == p["side"]]
+                    if twin:                 # SPY and QQQ move together: a second same-direction trade gets half the risk
+                        p2 = plan(bars[s], eq, min(left, TRADE_RISK_USD * CORRELATED_RISK_FACTOR))
+                        if not p2 or "skip" in p2:
+                            log(f"{s}: same direction as {twin[0]} - half-size trade rounds to nothing, skipped"); skipped.add(s); continue
+                        log(f"{s}: same direction as {twin[0]} already open today - risk halved to ${p2['risk']:.0f}")
+                        p = p2
                     cid = f"orb-{day:%Y%m%d}-{s}-{'L' if p['side'] == 'buy' else 'S'}-r{p['risk']:.0f}"
                     body = {"symbol": s, "qty": str(p["qty"]), "side": p["side"], "type": "market", "time_in_force": "day",
                             "order_class": "bracket", "client_order_id": cid,
@@ -259,7 +268,7 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
                         log(f"{s}: {'LONG' if p['side'] == 'buy' else 'SHORT'} {p['qty']} after the {p['bar']} bar closed "
                             f"{p['ref']:.2f} (range {p['lo']:.2f}-{p['hi']:.2f}); stop {p['stop']}, target {p['target']}, "
                             f"risk ${p['risk']:.0f} - order {o.get('id', '')[:8]}")
-                        done.add(s); left -= p["risk"]
+                        done.add(s); sides[s] = p["side"]; left -= p["risk"]
                     except Exception as e:  # noqa: BLE001
                         log(f"{s}: order rejected - {e}"); skipped.add(s)
                 if skill:
@@ -341,7 +350,7 @@ def write_note(st, today):
          "> [!success] Real orders in a separate Alpaca paper account",
          "> Two strategies, one account: the Opening Range Breakout rules from [[11 - Day Trading Simulator]] on SPY and QQQ, "
          "and the **day-trader-skill pack** ([[14 - Skill Pack Day Trader]]: scanner → exit plan → news → time machine → sizing) on 30 liquid stocks. "
-         "Real bracket orders, practice money. Risk: **$500 per trade, $5,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York.", "",
+         "Real bracket orders, practice money. Risk: **$500 per trade (a second same-direction SPY/QQQ trade gets half), $5,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York.", "",
          "## Account", "", "| | |", "|---|---|",
          f"| Started | {st.get('start')} with ${s0:,.2f} |",
          f"| **Equity** | **${eq:,.2f}** ({(eq / s0 - 1) * 100:+.2f}%) |" if eq else "| Equity | — |",
