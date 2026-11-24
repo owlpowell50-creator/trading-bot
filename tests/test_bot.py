@@ -410,3 +410,20 @@ class Brain(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CarriedTrades(unittest.TestCase):
+    def test_overnight_trade_gets_exit_from_later_fill(self):
+        from datetime import date
+        from bot import daytrade_live as dl
+        st = {"trades": [{"date": "2026-11-23", "symbol": "SPY", "side": "LONG", "qty": 39.0, "entry": 726.68, "entry_time": "15:25",
+                          "exit": None, "exit_time": None, "pnl": 0.0, "r": 0.0, "risk": 494.0, "strategy": "ORB"}]}
+        class Api:
+            def call(self, m, p, b=None):
+                return [{"symbol": "SPY", "side": "buy", "qty": "39", "price": "726.68", "transaction_time": "2026-11-23T15:25:01Z"},
+                        {"symbol": "QQQ", "side": "sell", "qty": "35", "price": "650", "transaction_time": "2026-11-24T14:31:00Z"},
+                        {"symbol": "SPY", "side": "sell", "qty": "39", "price": "720.00", "transaction_time": "2026-11-24T14:31:02Z"}]
+        dl.close_old_trades(Api(), st, date(2026, 11, 24), log=lambda *a: None)
+        t = st["trades"][0]
+        self.assertEqual(t["exit"], 720.0); self.assertEqual(t["exit_date"], "2026-11-24")
+        self.assertAlmostEqual(t["pnl"], (720.0 - 726.68) * 39, places=2); self.assertTrue(t["carried"])

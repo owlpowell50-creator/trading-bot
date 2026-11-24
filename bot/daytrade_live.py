@@ -309,6 +309,10 @@ def report(today: str | None = None, log=print):
     for f in fills:
         by_sym.setdefault(f["symbol"], []).append(f)
     st["trades"] = [t for t in st["trades"] if t["date"] != day.isoformat()]
+    try:
+        close_old_trades(api, st, day, log)
+    except Exception as e:  # noqa: BLE001
+        log(f"could not settle trades carried from earlier days: {e}")
     for s, fs in by_sym.items():
         k = next((n for n, f in enumerate(fs) if f.get("order_id") in orders), None)
         if k is None:
@@ -401,10 +405,40 @@ def write_note(st, today):
     _write(ROOT / "12 - Live Day Trading.md", "\n".join(L))
 
 
+def close_old_trades(api, st, day, log=print):
+    """Trades from earlier days that were never closed the same day (carried overnight, then flattened later):
+    find the closing fills in the account history and record the exit, so the ledger and the Brain stop
+    reporting them as open."""
+    for t in st["trades"]:
+        if t.get("exit") or t["date"] >= day.isoformat():
+            continue
+        want = "sell" if t["side"] == "LONG" else "buy"
+        fills = api.call("GET", f"/v2/account/activities/FILL?after={t['date']}T00:00:00Z&direction=asc&page_size=100") or []
+        need, got, val, last = float(t["qty"]), 0.0, 0.0, None
+        for f in fills:
+            if f.get("symbol") != t["symbol"] or f.get("side") != want:
+                continue
+            if f["transaction_time"][:10] == t["date"] and f["transaction_time"][11:16] <= (t.get("entry_time") or "00:00"):
+                continue
+            q = min(float(f["qty"]), need - got)
+            got += q; val += q * float(f["price"]); last = f
+            if got >= need - 1e-9:
+                break
+        if not last or got < need - 1e-9:
+            continue
+        xp = val / got
+        pnl = ((xp - t["entry"]) if t["side"] == "LONG" else (t["entry"] - xp)) * got
+        t.update(exit=round(xp, 4), exit_time=last["transaction_time"][11:16], exit_date=last["transaction_time"][:10],
+                 pnl=round(pnl, 2), r=round(pnl / t["risk"], 2) if t.get("risk") else None, carried=True)
+        log(f"{t['symbol']} {t['date']}: carried overnight, closed {t['exit_date']} at {xp:.2f} -> P&L ${pnl:+,.2f}")
+
+
 def _exit_kind(t):
     r = t.get("r")
     if not t.get("exit"):
         return "still open"
+    if t.get("carried"):
+        return f"held overnight, closed {t.get('exit_date', 'later')}"
     if r is None:
         return "closed"
     if r <= -0.85:
