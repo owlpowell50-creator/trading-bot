@@ -1,0 +1,27 @@
+# Second pass over the SEC data: fill in revenue the first pass missed (wider revenue tags, predecessor registrants).
+name: SEC data fix
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Get the current SEC data
+        run: git fetch -q origin sec-data && git show origin/sec-data:sec_fundamentals.jsonl.gz > in.jsonl.gz && ls -la in.jsonl.gz
+      - name: Fix missing revenue
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+        run: python tools/sec_fix_revenue.py in.jsonl.gz sec_fundamentals.jsonl.gz
+      - name: Save to the sec-data branch
+        run: |
+          mkdir /tmp/out && cp sec_fundamentals.jsonl.gz /tmp/out/
+          cd /tmp/out && git init -q -b sec-data && git add . \
+            && git -c user.name=trading-bot -c user.email=trading-bot@users.noreply.github.com commit -qm "SEC data (revenue fixed) $(date -u +%F)" \
+            && git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" sec-data
