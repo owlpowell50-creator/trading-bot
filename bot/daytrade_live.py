@@ -191,8 +191,8 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
     nxt = datetime.fromisoformat(clock["next_open"].replace("Z", "+00:00")).astimezone(NY)
     if not clock.get("is_open") and nxt.date() != day:
         log("market closed today"); return False
-    close_t = datetime.fromisoformat(clock["next_close"].replace("Z", "+00:00")).astimezone(NY)
-    if close_t.date() == day and (close_t.hour, close_t.minute) < (16, 0) and not flatten_at:
+    close_t = datetime.fromisoformat(clock["next_close"].replace("Z", "+00:00")).astimezone(NY) if clock.get("next_close") else None
+    if close_t and close_t.date() == day and (close_t.hour, close_t.minute) < (16, 0) and not flatten_at:
         log(f"early close today ({close_t:%H:%M} New York) - the close job would run too late, so no day trading")
         return False
     acct = api.call("GET", "/v2/account")
