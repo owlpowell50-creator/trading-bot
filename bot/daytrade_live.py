@@ -335,6 +335,10 @@ def report(today: str | None = None, log=print):
     STATE.write_text(json.dumps(st, indent=1))
     write_note(st, day.isoformat())
     try:
+        write_day_review(st, day.isoformat())
+    except Exception as e:  # noqa: BLE001
+        log(f"day review skipped: {e}")
+    try:
         from .benchmarks import write as write_benchmarks
         write_benchmarks(lambda m, p, b=None: api.call(m, p, b, data=True))
     except Exception as e:  # noqa: BLE001
@@ -390,5 +394,87 @@ def write_note(st, today):
             so = f"{d['stop']} / {d['target']}" if d.get("stop") else "—"
             dec = f"skipped: {d['skip']}" if d.get("skip") else f"**bought {d['qty']}** (risk ${d['risk']:.0f})"
             L.append(f"| {d['date']} | {d['symbol']} | {d['time']} @ {d['price']} | {so} | {tmv} | {dec.replace('|', '/')} |")
+    dts = sorted({d["date"] for d in st["days"]}, reverse=True)
+    if dts:
+        L += ["", "## Daily reviews", "", " · ".join(f"[[Day Trade Review {d}|{d}]]" for d in dts[:30])]
     L += ["", "Compare with the rule-based replay: [[11 - Day Trading Simulator#Scorecard]] · back to [[00 - Bot Dashboard]]", ""]
     _write(ROOT / "12 - Live Day Trading.md", "\n".join(L))
+
+
+def _exit_kind(t):
+    r = t.get("r")
+    if not t.get("exit"):
+        return "still open"
+    if r is None:
+        return "closed"
+    if r <= -0.85:
+        return "stopped out"
+    if r >= 1.8:
+        return "hit target"
+    return "closed before stop or target"
+
+
+def write_day_review(st, today):
+    """One note per trading day: what happened, how much of the risk budget was used, what to learn."""
+    tr = [t for t in st["trades"] if t["date"] == today]
+    sl = [d for d in (st.get("skill_log") or []) if d.get("date") == today]
+    days = sorted(st["days"], key=lambda d: d["date"])
+    k = next((i for i, d in enumerate(days) if d["date"] == today), None)
+    eq = days[k]["equity"] if k is not None else None
+    prev_eq = days[k - 1]["equity"] if k else (st.get("start_equity") or eq)
+    pnl = sum(t["pnl"] for t in tr)
+    day_chg = (eq - prev_eq) if (eq is not None and prev_eq is not None) else None
+    worst = min([t["pnl"] for t in tr] or [0])
+    risk_used = sum((t.get("risk") or 0) for t in tr)
+    all_tr = [t for t in st["trades"] if t["date"] <= today and t.get("exit")]
+    rs = [t["r"] for t in all_tr if t.get("r") is not None]
+    peak = max([d["equity"] for d in days[: (k or 0) + 1]] or [eq or 0])
+    L = [FM.format(type="day-trade-review", updated=today, extra_tags="\n  - day-trading\n  - review"),
+         f"# Day Trade Review {today}", "",
+         f"Back to [[12 - Live Day Trading]]" + (f" · previous: [[Day Trade Review {days[k - 1]['date']}]]" if k else ""), "",
+         "## The day", "", "| | |", "|---|---|",
+         f"| Trades | {len(tr)} |",
+         f"| Result of today's trades | ${pnl:+,.2f} |",
+         f"| Account change (includes anything left over) | ${day_chg:+,.2f} |" if day_chg is not None else "| Account change | — |",
+         f"| Equity at close | ${eq:,.2f} |" if eq else "| Equity at close | — |",
+         f"| Planned risk taken | ${risk_used:,.0f} of the ${DAY_RISK_USD:,.0f} daily limit |",
+         f"| Worst trade | ${worst:+,.2f} vs ${TRADE_RISK_USD:,.0f} planned risk per trade |",
+         f"| Below the account's peak | {(eq / peak - 1) * 100:+.2f}% |" if eq and peak else "| Below peak | — |", ""]
+    if tr:
+        L += ["## Trades", "", "| Strategy | Sym | Dir | Entry (UTC) | Exit (UTC) | How it ended | P&L $ | R |", "|---|---|---|---|---|---|---|---|"]
+        for t in tr:
+            ex = f"{t['exit']:.2f} ({t['exit_time']})" if t.get("exit") else "—"
+            rr = f"{t['r']:+.2f}" if t.get("r") is not None else "—"
+            L.append(f"| {t.get('strategy', 'ORB')} | {t['symbol']} | {t['side']} | {t['entry']:.2f} ({t['entry_time']}) | {ex} | {_exit_kind(t)} | {t['pnl']:+,.2f} | {rr} |")
+        L.append("")
+    if sl:
+        took = [d for d in sl if not d.get("skip")]
+        L += ["## Skill pack", "", f"{len(sl)} breakouts checked, {len(took)} taken.", ""]
+        reasons = {}
+        for d in sl:
+            if d.get("skip"):
+                key = d["skip"].split(":")[0].split("(")[0].strip()[:60]
+                reasons[key] = reasons.get(key, 0) + 1
+        if reasons:
+            L += ["| Why skipped | Count |", "|---|---|"] + [f"| {a.replace('|', '/')} | {n} |" for a, n in sorted(reasons.items(), key=lambda x: -x[1])] + [""]
+    notes = []
+    if not tr:
+        notes.append("No trades. A day without a valid setup is a normal outcome, not a failure.")
+    if any(_exit_kind(t) == "still open" for t in tr):
+        notes.append("A position was still open at the report — check that the 15:55 flatten ran.")
+    if tr and all(_exit_kind(t) == "stopped out" for t in tr):
+        notes.append("Every trade hit its stop. Losses stayed at the planned size, which is the risk rules working.")
+    if worst < -1.2 * TRADE_RISK_USD:
+        notes.append(f"The worst trade lost more than 1.2x its planned risk — likely a gap or slippage through the stop. Worth checking the fills.")
+    if day_chg is not None and abs(day_chg - pnl) > 50 and not any(_exit_kind(t) == "still open" for t in tr):
+        notes.append(f"The account moved ${day_chg - pnl:+,.0f} more than today's trades explain — a left-over position from an earlier day was closed or marked.")
+    syms = [t["symbol"] for t in tr]
+    if "SPY" in syms and "QQQ" in syms:
+        same = len({t["side"] for t in tr if t["symbol"] in ("SPY", "QQQ")}) == 1
+        if same:
+            notes.append("SPY and QQQ were traded in the same direction — effectively one bet on the market. Under the current rules the second trade risks half.")
+    if rs:
+        notes.append(f"Running record: {len(rs)} closed trades, average {sum(rs) / len(rs):+.2f}R, {sum(1 for x in rs if x > 0) / len(rs) * 100:.0f}% winners."
+                     + (" Too few trades to judge yet — wait for at least 30." if len(rs) < 30 else ""))
+    L += ["## What to take from it", ""] + [f"- {n}" for n in notes] + ["", "Reviews by day: [[12 - Live Day Trading]]", ""]
+    _write(ROOT / "Day Trades" / f"Day Trade Review {today}.md", "\n".join(L))

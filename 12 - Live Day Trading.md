@@ -17,7 +17,7 @@ tags:
 # 12 - Live Day Trading
 
 > [!success] Real orders in a separate Alpaca paper account
-> Two strategies, one account: the Opening Range Breakout rules from [[11 - Day Trading Simulator]] on SPY and QQQ, and the **day-trader-skill pack** ([[14 - Skill Pack Day Trader]]: scanner → exit plan → news → time machine → sizing) on 30 liquid stocks. Real bracket orders, practice money. Risk: **$500 per trade, $5,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York.
+> Two strategies, one account: the Opening Range Breakout rules from [[11 - Day Trading Simulator]] on SPY and QQQ, and the **day-trader-skill pack** ([[14 - Skill Pack Day Trader]]: scanner → exit plan → news → time machine → sizing) on 30 liquid stocks. Real bracket orders, practice money. Risk: **$500 per trade (a second same-direction SPY/QQQ trade gets half), $5,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York.
 
 ## Account
 
@@ -104,5 +104,9 @@ Every breakout the scanner found and what the pipeline decided. Source: [day-tra
 | 2026-11-19 | WMT | 10:00 AM @ 125.56 | 124.3 / 128.08 | — | skipped: news: earnings (Walmart Raises Fiscal Year Guidance Amid 3Q Earnings Beat) |
 | 2026-11-19 | QCOM | 9:50 AM @ 170.71 | 166.58 / 178.97 | target 4% / stop 31%, avg R +0.01 | skipped: time machine: strongly toward the stop |
 | 2026-11-19 | INTC | 9:50 AM @ 59.15 | 58.14 / 61.17 | target 19% / stop 57%, avg R -0.07 | skipped: time machine: leans toward the stop |
+
+## Daily reviews
+
+[[Day Trade Review 2026-11-23|2026-11-23]] · [[Day Trade Review 2026-11-20|2026-11-20]] · [[Day Trade Review 2026-11-19|2026-11-19]] · [[Day Trade Review 2026-11-18|2026-11-18]] · [[Day Trade Review 2026-11-17|2026-11-17]]
 
 Compare with the rule-based replay: [[11 - Day Trading Simulator#Scorecard]] · back to [[00 - Bot Dashboard]]
