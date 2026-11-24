@@ -91,7 +91,8 @@ def predecessor(d):
         if cik == d["cik"]:
             continue
         sim = difflib.SequenceMatcher(None, norm(nm), norm(name)).ratio()
-        if sim < 0.75:
+        nums = lambda x: set(re.findall(r"\b(?:[ivx]+|\d+)\b", x.lower()))   # "Corp. II" is not "Corp. IV"
+        if sim < 0.9 or nums(nm) != nums(name):
             continue
         cf = sf.get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json")
         if not cf:
