@@ -1,16 +1,16 @@
 {
- "date": "2026-11-23",
- "data_through": "2026-11-23",
- "generated": "2026-11-24T13:07Z",
+ "date": "2026-11-24",
+ "data_through": "2026-11-24",
+ "generated": "2026-11-24T16:13Z",
  "thoughts": [
   "if the month ended today I would hold cash 67%, commodities 33%",
-  "that would mean cash 1% \u2192 67%; commodities 23% \u2192 33%; US stocks 39% \u2192 0%; foreign stocks 37% \u2192 0% at the next rebalance (1 Dec)",
-  "real estate would get in after a 0.8% rise (others unchanged)",
-  "US stocks would get in after a 2.9% rise (others unchanged)",
-  "7-10y Treasuries would get in after a 3.5% rise (others unchanged)",
-  "portfolio volatility 13.0% against a cap of 22.3%",
-  "S&P 500 is -0.9% vs its 200-day average and -7.1% from its 1-year high",
-  "live account -5.0% from its high",
+  "that would mean cash 1% \u2192 67%; commodities 23% \u2192 33%; foreign stocks 37% \u2192 0%; US stocks 39% \u2192 0% at the next rebalance (1 Dec)",
+  "real estate would get in after a 0.3% rise (others unchanged)",
+  "7-10y Treasuries would get in after a 3.1% rise (others unchanged)",
+  "commodities would drop out after a 4.2% fall (others unchanged)",
+  "portfolio volatility 12.9% against a cap of 22.3%",
+  "S&P 500 is -2.4% vs its 200-day average and -8.4% from its 1-year high",
+  "live account -5.9% from its high",
   "worst stress scenario for today's holdings: equity crash -20.7%",
   "day trader last 5 sessions: 7 closed trades, 4 winners, avg R +0.19",
   "skill pack looked at 47 breakouts; most common decision: time machine (42)"
@@ -18,11 +18,11 @@
  "alerts": [
   {
    "level": "amber",
-   "text": "real estate is within 0.8% of entering the portfolio"
+   "text": "real estate is within 0.3% of entering the portfolio"
   },
   {
    "level": "amber",
-   "text": "US stocks volatility 32% (1 month) vs 15% normal"
+   "text": "US stocks volatility 31% (1 month) vs 15% normal"
   },
   {
    "level": "red",
@@ -35,143 +35,143 @@
    "CASH": 0.6666666666666667
   },
   "held": {
-   "INTL": 0.3684305079679964,
-   "COMMOD": 0.23419285479224275,
-   "US": 0.39211437442874325,
-   "CASH": 0.005262262811017604
+   "INTL": 0.3701874607578178,
+   "COMMOD": 0.234495172406167,
+   "US": 0.39000090887265126,
+   "CASH": 0.005316457963363996
   },
   "changes": [
    [
     "CASH",
-    0.005262262811017604,
+    0.005316457963363996,
     0.6666666666666667
    ],
    [
     "COMMOD",
-    0.23419285479224275,
+    0.234495172406167,
     0.3333333333333333
    ],
    [
-    "US",
-    0.39211437442874325,
+    "INTL",
+    0.3701874607578178,
     0
    ],
    [
-    "INTL",
-    0.3684305079679964,
+    "US",
+    0.39000090887265126,
     0
    ]
   ]
  },
  "scores": {
-  "US": -0.007086792705139677,
-  "INTL": -0.01685875218839376,
-  "BONDS": -0.01281093874420732,
-  "LONGBONDS": -0.026411212624665725,
-  "REIT": 0.012947810044655284,
-  "GOLD": -0.16851552800071157,
-  "COMMOD": 0.07595366422252285,
-  "CASH": 0.021386178508792247
+  "US": -0.02152911675521892,
+  "INTL": -0.02128866161808407,
+  "BONDS": -0.0091338807211138,
+  "LONGBONDS": -0.02157669467577683,
+  "REIT": 0.018519104135252262,
+  "GOLD": -0.19106335766327556,
+  "COMMOD": 0.06667743818735335,
+  "CASH": 0.02150026594577244
  },
  "flips": [
   {
    "asset": "COMMOD",
    "status": "held",
-   "score": 0.07595366422252285,
-   "move": -0.05071546064500898,
+   "score": 0.06667743818735335,
+   "move": -0.04235317128142535,
    "to": "drop out"
   },
   {
    "asset": "REIT",
    "status": "out",
-   "score": 0.012947810044655284,
-   "move": 0.008330506646502256,
-   "to": "get in"
-  },
-  {
-   "asset": "US",
-   "status": "out",
-   "score": -0.007086792705139677,
-   "move": 0.028676193452502385,
+   "score": 0.018519104135252262,
+   "move": 0.0029269571856005427,
    "to": "get in"
   },
   {
    "asset": "BONDS",
    "status": "out",
-   "score": -0.01281093874420732,
-   "move": 0.03464089969706308,
+   "score": -0.0091338807211138,
+   "move": 0.03091653460629007,
    "to": "get in"
   },
   {
    "asset": "INTL",
    "status": "out",
-   "score": -0.01685875218839376,
-   "move": 0.038900748780824834,
+   "score": -0.02128866161808407,
+   "move": 0.04371966062495858,
+   "to": "get in"
+  },
+  {
+   "asset": "US",
+   "status": "out",
+   "score": -0.02152911675521892,
+   "move": 0.043976150376900724,
    "to": "get in"
   },
   {
    "asset": "LONGBONDS",
    "status": "out",
-   "score": -0.026411212624665725,
-   "move": 0.049094023835579925,
+   "score": -0.02157669467577683,
+   "move": 0.04402691594439756,
    "to": "get in"
   },
   {
    "asset": "GOLD",
    "status": "out",
-   "score": -0.16851552800071157,
-   "move": 0.22838875878570386,
+   "score": -0.19106335766327556,
+   "move": 0.2627691867128539,
    "to": "get in"
   }
  ],
  "vol": {
   "US": {
-   "1m": 0.3174137219508132,
-   "3m": 0.1985772849680251,
-   "1y": 0.15090305486362568
+   "1m": 0.3125066909541906,
+   "3m": 0.19748338092372486,
+   "1y": 0.1503804956090654
   },
   "INTL": {
-   "1m": 0.2473111420073135,
-   "3m": 0.16909077651075902,
-   "1y": 0.17001559553076306
+   "1m": 0.24694345285664365,
+   "3m": 0.16905500596409542,
+   "1y": 0.1694242256373887
   },
   "BONDS": {
-   "1m": 0.06727746554327727,
-   "3m": 0.06270805135954029,
-   "1y": 0.051826936090943576
+   "1m": 0.06753654161304516,
+   "3m": 0.06282285381723297,
+   "1y": 0.051782777038998966
   },
   "LONGBONDS": {
-   "1m": 0.10924509338083292,
-   "3m": 0.1074902919667929,
-   "1y": 0.09788484909983292
+   "1m": 0.10925313359549828,
+   "3m": 0.10778137077427384,
+   "1y": 0.09793422676726925
   },
   "REIT": {
-   "1m": 0.20191422109962726,
-   "3m": 0.15618379676736358,
-   "1y": 0.14347275958235786
+   "1m": 0.2021636933061912,
+   "3m": 0.1563010504222551,
+   "1y": 0.14270335861652106
   },
   "GOLD": {
-   "1m": 0.3443594899692,
-   "3m": 0.26472317931344663,
-   "1y": 0.2955453212652456
+   "1m": 0.33271899887473133,
+   "3m": 0.25956606680027416,
+   "1y": 0.294958482281038
   },
   "COMMOD": {
-   "1m": 0.18952540662796644,
-   "3m": 0.18745528986199542,
-   "1y": 0.21370835189032641
+   "1m": 0.18927531069142295,
+   "3m": 0.18798498625170484,
+   "1y": 0.21378005334765404
   }
  },
  "stress": {
-  "Equity crash": -0.2068436234196215,
-  "Credit crisis": -0.19889375894454633,
-  "Inflation shock": -0.052635202760449695,
-  "Rate shock": -0.03802724411983699,
-  "Everything falls": -0.13750101783873522
+  "Equity crash": -0.20671199523065142,
+  "Credit crisis": -0.19896143976145603,
+  "Inflation shock": -0.052569319722430216,
+  "Rate shock": -0.038009418481523456,
+  "Everything falls": -0.13747777268518704
  },
- "drawdown": -0.04968939129895589,
+ "drawdown": -0.05939214404762905,
  "portfolio_vol": {
-  "now": 0.12955415646824714,
-  "target": 0.062485096620665134,
+  "now": 0.12899976510639619,
+  "target": 0.06266166208390161,
   "cap": 0.22339434319461013
  }
 }
