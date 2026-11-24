@@ -217,6 +217,11 @@ def cmd_daily(args):
     refresh_extras(cfg, s, today)
     if cfg["mode"].startswith("alpaca"):
         live_notes(cfg, broker, today, run)
+    try:                                    # the bot reviews itself and writes what it is thinking
+        from bot import brain
+        brain.think(today)
+    except Exception as e:  # noqa: BLE001
+        print("brain skipped:", e)
     print(f"{status}: {headline}")
     for pr in run["problems"]:
         print("  !", pr)

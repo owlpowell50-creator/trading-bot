@@ -396,5 +396,17 @@ class DayRiskBudget(unittest.TestCase):
             self.assertLess(small["qty"], full["qty"])
 
 
+class Brain(unittest.TestCase):
+    def test_flip_moves(self):
+        from bot.brain import flips
+        sc = {"US": 0.10, "INTL": 0.08, "GOLD": 0.05, "REIT": 0.04, "CASH": 0.02}
+        f = {x["asset"]: x for x in flips(sc)}
+        self.assertEqual(f["US"]["status"], "held"); self.assertEqual(f["REIT"]["status"], "out")
+        # REIT must beat GOLD's 5%: (1.05/1.04) - 1
+        self.assertAlmostEqual(f["REIT"]["move"], 1.05 / 1.04 - 1, places=6)
+        # GOLD drops out once it falls below REIT's 4%
+        self.assertAlmostEqual(f["GOLD"]["move"], 1.04 / 1.05 - 1, places=6)
+
+
 if __name__ == "__main__":
     unittest.main()
