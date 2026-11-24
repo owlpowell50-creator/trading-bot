@@ -27,14 +27,14 @@ tags:
 - S&P 500 is -2.4% vs its 200-day average and -8.4% from its 1-year high
 - live account -5.9% from its high
 - worst stress scenario for today's holdings: equity crash -20.7%
-- day trader last 5 sessions: 7 closed trades, 4 winners, avg R +0.19
-- skill pack looked at 47 breakouts; most common decision: time machine (42)
+- day trader last 6 sessions: 11 closed trades, 5 winners, avg R -0.17
+- skill pack looked at 68 breakouts; most common decision: time machine (61)
 
 ## Alerts
 
 - 🟠 real estate is within 0.3% of entering the portfolio
 - 🟠 US stocks volatility 31% (1 month) vs 15% normal
-- 🔴 day trader has trades with no recorded exit: SPY 2026-11-18, SPY 2026-11-23, QQQ 2026-11-23 — check the day-trading account is flat
+- 🔴 day trader has trades with no recorded exit: SPY 2026-11-24 — check the day-trading account is flat
 
 ## If the month ended today
 
@@ -79,9 +79,9 @@ Portfolio volatility now **12.9%**, planned **6.3%**, cap 22.3%.
 
 ## Day trader
 
-- Sessions reviewed: 2026-11-17, 2026-11-18, 2026-11-19, 2026-11-20, 2026-11-23
-- Closed trades 7, winners 4, P&L $47.31, average R +0.19
-- Skill pack decisions: time machine (42), news (5)
+- Sessions reviewed: 2026-11-18, 2026-11-19, 2026-11-20, 2026-11-23, 2026-11-24
+- Closed trades 11, winners 5, P&L $-1,370.19, average R -0.17
+- Skill pack decisions: time machine (61), news (7)
 
 ---
 

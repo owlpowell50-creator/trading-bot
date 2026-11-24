@@ -1,7 +1,7 @@
 {
  "date": "2026-11-24",
  "data_through": "2026-11-24",
- "generated": "2026-11-24T16:13Z",
+ "generated": "2026-11-24T20:55Z",
  "thoughts": [
   "if the month ended today I would hold cash 67%, commodities 33%",
   "that would mean cash 1% \u2192 67%; commodities 23% \u2192 33%; foreign stocks 37% \u2192 0%; US stocks 39% \u2192 0% at the next rebalance (1 Dec)",
@@ -12,8 +12,8 @@
   "S&P 500 is -2.4% vs its 200-day average and -8.4% from its 1-year high",
   "live account -5.9% from its high",
   "worst stress scenario for today's holdings: equity crash -20.7%",
-  "day trader last 5 sessions: 7 closed trades, 4 winners, avg R +0.19",
-  "skill pack looked at 47 breakouts; most common decision: time machine (42)"
+  "day trader last 6 sessions: 11 closed trades, 5 winners, avg R -0.17",
+  "skill pack looked at 68 breakouts; most common decision: time machine (61)"
  ],
  "alerts": [
   {
@@ -26,7 +26,7 @@
   },
   {
    "level": "red",
-   "text": "day trader has trades with no recorded exit: SPY 2026-11-18, SPY 2026-11-23, QQQ 2026-11-23 \u2014 check the day-trading account is flat"
+   "text": "day trader has trades with no recorded exit: SPY 2026-11-24 \u2014 check the day-trading account is flat"
   }
  ],
  "preview": {
