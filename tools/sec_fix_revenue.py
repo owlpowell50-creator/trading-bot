@@ -28,7 +28,7 @@ EXTRA_REVENUE = [
     "PremiumsEarnedNet", "HealthCareOrganizationRevenue", "RegulatedOperatingRevenue", "UtilitiesOperatingRevenue",
     "TotalRevenuesAndOtherIncome", "RevenueMineralSales", "BrokerageCommissionsRevenue", "InvestmentBankingRevenue",
     "FinancialServicesRevenue", "RevenueNotFromContractWithCustomer", "RevenuesExcludingInterestAndDividends",
-    "NoninterestIncome", "InterestAndFeeIncomeLoansAndLeases",
+    # (NoninterestIncome / InterestAndFeeIncomeLoansAndLeases are only part of a bank's revenue, so they are not used)
 ]
 for c in EXTRA_REVENUE:
     sf.LINES.setdefault(c, "Revenue")
@@ -57,9 +57,14 @@ def refetch(d):
 def edgar_search(name):
     q = re.sub(r"\b(holdings?|corp(oration)?|inc|co|ltd|plc|group|sa|nv|ag)\b\.?", "", name, flags=re.I)
     q = re.sub(r"[^A-Za-z0-9 &]", " ", q).strip()
-    q = " ".join(q.split()[:3])
-    if len(q) < 3:
-        return []
+    out = []
+    for qq in dict.fromkeys([" ".join(q.split()[:3]), q.split()[0] if q.split() else "", q.replace(" ", "")[:5]]):
+        if len(qq) >= 3:
+            out += _search(qq)
+    return list(dict.fromkeys(out))
+
+
+def _search(q):
     url = "https://www.sec.gov/cgi-bin/browse-edgar?" + urllib.parse.urlencode(
         {"company": q, "type": "10-K", "dateb": "", "owner": "include", "count": "40", "action": "getcompany", "output": "atom"})
     req = sf.urllib.request.Request(url, headers={"User-Agent": sf.UA})
@@ -103,6 +108,9 @@ def predecessor(d):
 
 
 def work(d):
+    if d.get("fixes"):                     # re-do anything an earlier pass touched, with today's rules
+        d["fixes"] = []
+        d.pop("data_cik", None)
     try:
         if d.get("status") != "ok" or d.get("sic") in FUND_SIC:
             return d
@@ -111,7 +119,7 @@ def work(d):
                 d = predecessor(d)
             else:
                 d = refetch(d)
-        elif not has_recent_revenue(d):
+        elif not has_recent_revenue(d) or any(x.get("concept") in ("NoninterestIncome", "InterestAndFeeIncomeLoansAndLeases") for x in (d.get("annual") or {}).get("Revenue", [])):
             d = refetch(d)
     except Exception as e:  # noqa: BLE001
         d.setdefault("fixes", []).append(f"retry failed: {e}"[:120])
