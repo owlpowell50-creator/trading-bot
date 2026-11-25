@@ -153,12 +153,14 @@
    "qty": 84.0,
    "entry": 718.91,
    "entry_time": "14:50",
-   "exit": null,
-   "exit_time": null,
-   "pnl": 0.0,
-   "r": 0.0,
+   "exit": 697.75,
+   "exit_time": "14:42",
+   "pnl": -1777.44,
+   "r": -3.6,
    "risk": 494.0,
-   "strategy": "ORB"
+   "strategy": "ORB",
+   "exit_date": "2026-11-25",
+   "carried": true
   },
   {
    "date": "2026-11-24",
@@ -172,6 +174,34 @@
    "pnl": -259.6,
    "r": -1.04,
    "risk": 249.0,
+   "strategy": "ORB"
+  },
+  {
+   "date": "2026-11-25",
+   "symbol": "SPY",
+   "side": "LONG",
+   "qty": 66.0,
+   "entry": 703.1868,
+   "entry_time": "15:00",
+   "exit": 714.5536,
+   "exit_time": "18:20",
+   "pnl": 750.21,
+   "r": 1.5,
+   "risk": 500.0,
+   "strategy": "ORB"
+  },
+  {
+   "date": "2026-11-25",
+   "symbol": "QQQ",
+   "side": "LONG",
+   "qty": 25.0,
+   "entry": 617.73,
+   "entry_time": "15:00",
+   "exit": 631.9976,
+   "exit_time": "18:46",
+   "pnl": 356.69,
+   "r": 1.48,
+   "risk": 241.0,
    "strategy": "ORB"
   }
  ],
@@ -199,6 +229,10 @@
   {
    "date": "2026-11-24",
    "equity": 98799.79
+  },
+  {
+   "date": "2026-11-25",
+   "equity": 98236.05
   }
  ],
  "start": "2026-11-17",

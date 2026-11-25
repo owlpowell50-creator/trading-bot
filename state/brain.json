@@ -1,10 +1,10 @@
 {
  "date": "2026-11-25",
  "data_through": "2026-11-25",
- "generated": "2026-11-25T16:10Z",
+ "generated": "2026-11-25T20:55Z",
  "thoughts": [
   "if the month ended today I would hold real estate 36%, cash 33%, commodities 30%",
-  "that would mean real estate 0% \u2192 36%; cash 1% \u2192 33%; commodities 24% \u2192 30%; foreign stocks 37% \u2192 0% at the next rebalance (1 Dec)",
+  "that would mean real estate 0% \u2192 36%; cash 1% \u2192 33%; commodities 24% \u2192 30%; US stocks 39% \u2192 0% at the next rebalance (1 Dec)",
   "real estate would drop out after a 0.4% fall (others unchanged)",
   "7-10y Treasuries would get in after a 2.5% rise (others unchanged)",
   "20y+ Treasuries would get in after a 3.4% rise (others unchanged)",
@@ -12,8 +12,8 @@
   "S&P 500 is -4.5% vs its 200-day average and -10.4% from its 1-year high",
   "live account -7.0% from its high",
   "worst stress scenario for today's holdings: equity crash -20.6%",
-  "day trader last 6 sessions: 11 closed trades, 5 winners, avg R -0.17",
-  "skill pack looked at 68 breakouts; most common decision: time machine (61)"
+  "day trader last 7 sessions: 14 closed trades, 7 winners, avg R -0.18",
+  "skill pack looked at 84 breakouts; most common decision: time machine (76)"
  ],
  "alerts": [
   {
@@ -23,10 +23,6 @@
   {
    "level": "amber",
    "text": "US stocks volatility 32% (1 month) vs 15% normal"
-  },
-  {
-   "level": "red",
-   "text": "day trader has trades with no recorded exit: SPY 2026-11-24 \u2014 check the day-trading account is flat"
   }
  ],
  "preview": {
@@ -58,13 +54,13 @@
     0.30497119418477964
    ],
    [
-    "INTL",
-    0.3706692530712885,
+    "US",
+    0.38638023215652734,
     0
    ],
    [
-    "US",
-    0.38638023215652734,
+    "INTL",
+    0.3706692530712885,
     0
    ]
   ]

@@ -19,7 +19,7 @@ tags:
 ## Thoughts
 
 - if the month ended today I would hold real estate 36%, cash 33%, commodities 30%
-- that would mean real estate 0% → 36%; cash 1% → 33%; commodities 24% → 30%; foreign stocks 37% → 0% at the next rebalance (1 Dec)
+- that would mean real estate 0% → 36%; cash 1% → 33%; commodities 24% → 30%; US stocks 39% → 0% at the next rebalance (1 Dec)
 - real estate would drop out after a 0.4% fall (others unchanged)
 - 7-10y Treasuries would get in after a 2.5% rise (others unchanged)
 - 20y+ Treasuries would get in after a 3.4% rise (others unchanged)
@@ -27,14 +27,13 @@ tags:
 - S&P 500 is -4.5% vs its 200-day average and -10.4% from its 1-year high
 - live account -7.0% from its high
 - worst stress scenario for today's holdings: equity crash -20.6%
-- day trader last 6 sessions: 11 closed trades, 5 winners, avg R -0.17
-- skill pack looked at 68 breakouts; most common decision: time machine (61)
+- day trader last 7 sessions: 14 closed trades, 7 winners, avg R -0.18
+- skill pack looked at 84 breakouts; most common decision: time machine (76)
 
 ## Alerts
 
 - 🟠 real estate is within 0.4% of leaving the portfolio
 - 🟠 US stocks volatility 32% (1 month) vs 15% normal
-- 🔴 day trader has trades with no recorded exit: SPY 2026-11-24 — check the day-trading account is flat
 
 ## If the month ended today
 
@@ -79,9 +78,9 @@ Portfolio volatility now **13.1%**, planned **6.4%**, cap 22.3%.
 
 ## Day trader
 
-- Sessions reviewed: 2026-11-18, 2026-11-19, 2026-11-20, 2026-11-23, 2026-11-24
-- Closed trades 11, winners 5, P&L $-1,370.19, average R -0.17
-- Skill pack decisions: time machine (61), news (7)
+- Sessions reviewed: 2026-11-19, 2026-11-20, 2026-11-23, 2026-11-24, 2026-11-25
+- Closed trades 14, winners 7, P&L $-2,040.73, average R -0.18
+- Skill pack decisions: time machine (76), news (8)
 
 ---
 
