@@ -1,16 +1,16 @@
 {
- "taken_at": "2026-11-24T16:13:58+00:00",
+ "taken_at": "2026-11-25T16:10:49+00:00",
  "environment": "ALPACA-PAPER",
  "account": {
   "account_number": "\u2022\u2022\u2022PJMU",
   "status": "ACTIVE",
   "currency": "USD",
-  "equity": "94050.58",
-  "last_equity": "94809.21320912386",
+  "equity": "92968.31",
+  "last_equity": "94626.99631184898",
   "cash": "500.02",
-  "buying_power": "263941.66",
-  "portfolio_value": "94050.58",
-  "long_market_value": "93550.56",
+  "buying_power": "260911.3",
+  "portfolio_value": "92968.31",
+  "long_market_value": "92468.29",
   "created_at": "2026-11-12T15:57:43.300894Z",
   "pattern_day_trader": null,
   "daytrade_count": null
@@ -20,40 +20,40 @@
    "symbol": "IEFA",
    "qty": "380.589696032",
    "avg_entry_price": "97.05",
-   "current_price": "91.48",
-   "market_value": "34816.345393",
+   "current_price": "90.545",
+   "market_value": "34460.494027",
    "cost_basis": "36936.23",
-   "unrealized_pl": "-2119.884607",
-   "unrealized_plpc": "-0.05739",
-   "unrealized_intraday_pl": "-144.624084",
-   "change_today": "-0.00414",
-   "lastday_price": "91.86"
+   "unrealized_pl": "-2475.735973",
+   "unrealized_plpc": "-0.06703",
+   "unrealized_intraday_pl": "-561.369802",
+   "change_today": "-0.01603",
+   "lastday_price": "92.02"
   },
   {
    "symbol": "PDBC",
    "qty": "1280.758601856",
    "avg_entry_price": "18.31",
-   "current_price": "17.2198",
-   "market_value": "22054.406972",
+   "current_price": "17.245",
+   "market_value": "22086.682089",
    "cost_basis": "23450.69",
-   "unrealized_pl": "-1396.283028",
-   "unrealized_plpc": "-0.05954",
-   "unrealized_intraday_pl": "-141.139598",
-   "change_today": "-0.00636",
-   "lastday_price": "17.33"
+   "unrealized_pl": "-1364.007911",
+   "unrealized_plpc": "-0.05816",
+   "unrealized_intraday_pl": "-44.826551",
+   "change_today": "-0.00203",
+   "lastday_price": "17.28"
   },
   {
    "symbol": "VOO",
    "qty": "55.960412046",
    "avg_entry_price": "698.941423",
-   "current_price": "655.46",
-   "market_value": "36679.81168",
+   "current_price": "641.9023",
+   "market_value": "35921.117201",
    "cost_basis": "39113.050027",
-   "unrealized_pl": "-2433.238347",
-   "unrealized_plpc": "-0.06221",
-   "unrealized_intraday_pl": "-472.865481",
-   "change_today": "-0.01273",
-   "lastday_price": "663.91"
+   "unrealized_pl": "-3191.932826",
+   "unrealized_plpc": "-0.08161",
+   "unrealized_intraday_pl": "-1052.486642",
+   "change_today": "-0.02847",
+   "lastday_price": "660.71"
   }
  ],
  "orders": [
@@ -96,7 +96,6 @@
  ],
  "history": {
   "timestamp": [
-   1764032400,
    1764118800,
    1764205200,
    1764367200,
@@ -346,10 +345,10 @@
    1795050000,
    1795136400,
    1795222800,
-   1795482000
+   1795482000,
+   1795568400
   ],
   "equity": [
-   0.0,
    0.0,
    0.0,
    0.0,
@@ -599,7 +598,8 @@
    96118.2,
    94926.95,
    92517.95,
-   94809.21
+   94809.21,
+   94627.0
   ]
  }
 }
