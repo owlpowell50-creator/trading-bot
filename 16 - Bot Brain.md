@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-25
+updated: 2026-11-26
 tags:
   - type/bot-note
   - trading-bot
@@ -13,39 +13,39 @@ tags:
 ---
 # 16 - Bot Brain
 
-> [!abstract] What the bot is thinking — 2026-11-25 (prices through 2026-11-25)
+> [!abstract] What the bot is thinking — 2026-11-26 (prices through 2026-11-25)
 > The bot reviews itself after every daily run: it previews the next rebalance, measures how close each decision is to flipping, checks volatility, stress and the day trader, and flags anything unusual. It never trades from here.
 
 ## Thoughts
 
-- if the month ended today I would hold real estate 36%, cash 33%, commodities 30%
-- that would mean real estate 0% → 36%; cash 1% → 33%; commodities 24% → 30%; US stocks 39% → 0% at the next rebalance (1 Dec)
-- real estate would drop out after a 0.4% fall (others unchanged)
-- 7-10y Treasuries would get in after a 2.5% rise (others unchanged)
-- 20y+ Treasuries would get in after a 3.4% rise (others unchanged)
-- portfolio volatility 13.1% against a cap of 22.3%
-- S&P 500 is -4.5% vs its 200-day average and -10.4% from its 1-year high
-- live account -7.0% from its high
-- worst stress scenario for today's holdings: equity crash -20.6%
+- if the month ended today I would hold real estate 36%, cash 33%, commodities 31%
+- that would mean real estate 0% → 36%; cash 1% → 33%; commodities 24% → 31%; US stocks 39% → 0% at the next rebalance (1 Dec)
+- real estate would drop out after a 1.3% fall (others unchanged)
+- 7-10y Treasuries would get in after a 2.9% rise (others unchanged)
+- foreign stocks would get in after a 3.5% rise (others unchanged)
+- portfolio volatility 12.8% against a cap of 22.3%
+- S&P 500 is -1.9% vs its 200-day average and -8.0% from its 1-year high
+- live account -5.1% from its high
+- worst stress scenario for today's holdings: equity crash -20.7%
 - day trader last 7 sessions: 14 closed trades, 7 winners, avg R -0.18
 - skill pack looked at 84 breakouts; most common decision: time machine (76)
 
 ## Alerts
 
-- 🟠 real estate is within 0.4% of leaving the portfolio
-- 🟠 US stocks volatility 32% (1 month) vs 15% normal
+- 🟠 real estate is within 1.3% of leaving the portfolio
+- 🟠 US stocks volatility 31% (1 month) vs 15% normal
 
 ## If the month ended today
 
 | Asset | Score (avg 3/6/12-month return) | Held now | Would hold | Move that flips it |
 |---|---|---|---|---|
-| commodities | +6.9% (beats T-bills) | 24% | 30% | 4.4% fall → drop out |
-| real estate | +2.6% (beats T-bills) | 0% | 36% | 0.4% fall → drop out |
-| 7-10y Treasuries | -0.3% | 0% | 0% | 2.5% rise → get in |
-| 20y+ Treasuries | -1.2% | 0% | 0% | 3.4% rise → get in |
-| foreign stocks | -3.2% | 37% | 0% | 5.5% rise → get in |
-| US stocks | -4.3% | 39% | 0% | 6.7% rise → get in |
-| gold | -21.8% | 0% | 0% | 30.7% rise → get in |
+| commodities | +8.0% (beats T-bills) | 24% | 31% | 5.4% fall → drop out |
+| real estate | +3.5% (beats T-bills) | 0% | 36% | 1.3% fall → drop out |
+| 7-10y Treasuries | -0.7% | 0% | 0% | 2.9% rise → get in |
+| foreign stocks | -1.3% | 37% | 0% | 3.5% rise → get in |
+| US stocks | -1.7% | 39% | 0% | 3.9% rise → get in |
+| 20y+ Treasuries | -1.8% | 0% | 0% | 4.1% rise → get in |
+| gold | -19.0% | 0% | 0% | 26.1% rise → get in |
 | cash (T-bills) | +2.2% | 1% | 33% | — |
 
 *Flip moves assume the other assets stand still; the score is the average of the 3-, 6- and 12-month returns, and the bot holds up to three assets that beat T-bills.*
@@ -54,21 +54,21 @@ tags:
 
 | Asset | 1 month | 3 months | 1 year |
 |---|---|---|---|
-| US stocks | 32% | 20% | 15% |
+| US stocks | 31% | 20% | 15% |
 | foreign stocks | 25% | 17% | 17% |
-| 7-10y Treasuries | 7% | 7% | 5% |
-| 20y+ Treasuries | 12% | 11% | 10% |
+| 7-10y Treasuries | 7% | 6% | 5% |
+| 20y+ Treasuries | 11% | 11% | 10% |
 | real estate | 20% | 16% | 14% |
-| gold | 34% | 27% | 30% |
-| commodities | 19% | 19% | 21% |
+| gold | 33% | 26% | 29% |
+| commodities | 20% | 19% | 21% |
 
-Portfolio volatility now **13.1%**, planned **6.4%**, cap 22.3%.
+Portfolio volatility now **12.8%**, planned **6.5%**, cap 22.3%.
 
 ## Stress test on today's holdings
 
 | Scenario | One-month loss |
 |---|---|
-| Equity crash | -20.6% |
+| Equity crash | -20.7% |
 | Credit crisis | -19.9% |
 | Everything falls | -13.7% |
 | Inflation shock | -5.2% |
