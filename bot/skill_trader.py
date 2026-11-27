@@ -167,7 +167,7 @@ def evaluate(api, sym, today_bars, hist_bars, day, now_utc, equity, mods=None, m
 
 
 def order_body(d, day):
-    return {"symbol": d["symbol"], "qty": str(d["qty"]), "side": "buy", "type": "market", "time_in_force": "day",
+    return {"symbol": d["symbol"], "qty": str(d["qty"]), "side": "buy", "type": "market", "time_in_force": "gtc",
             "order_class": "bracket", "client_order_id": f"{PREFIX}-{day:%Y%m%d}-{d['symbol']}-L-r{d['risk']:.0f}",
             "take_profit": {"limit_price": f"{d['target']:.2f}"}, "stop_loss": {"stop_price": f"{d['stop']:.2f}"}}
 

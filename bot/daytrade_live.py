@@ -376,7 +376,7 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
                         log(f"{s}: same direction as {twin[0]} already open today - risk halved to ${p2['risk']:.0f}")
                         p = p2
                     cid = f"orb-{day:%Y%m%d}-{s}-{'L' if p['side'] == 'buy' else 'S'}-r{p['risk']:.0f}"
-                    body = {"symbol": s, "qty": str(p["qty"]), "side": p["side"], "type": "market", "time_in_force": "day",
+                    body = {"symbol": s, "qty": str(p["qty"]), "side": p["side"], "type": "market", "time_in_force": "gtc",
                             "order_class": "bracket", "client_order_id": cid,
                             "take_profit": {"limit_price": f"{p['target']:.2f}"}, "stop_loss": {"stop_price": f"{p['stop']:.2f}"}}
                     try:
