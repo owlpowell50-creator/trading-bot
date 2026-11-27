@@ -105,6 +105,77 @@ def bars_today(api: Alpaca, day: date):
     return out
 
 
+
+TREND_DAYS = 20
+
+
+def daily_sma(api: Alpaca, day: date, n: int = TREND_DAYS):
+    """Average of the last n daily closes BEFORE `day`, per symbol (the trend filter's line)."""
+    q = urllib.parse.urlencode({"symbols": ",".join(SYMBOLS), "timeframe": "1Day", "feed": "sip", "adjustment": "all",
+                                "start": (day - timedelta(days=n * 2 + 15)).isoformat(), "end": (day - timedelta(days=1)).isoformat(),
+                                "limit": 1000})
+    r = api.call("GET", "/v2/stocks/bars?" + q, data=True)
+    out = {}
+    for s, bs in (r.get("bars") or {}).items():
+        closes = [b["c"] for b in bs if b["t"][:10] < day.isoformat()]
+        if len(closes) >= n:
+            out[s] = sum(closes[-n:]) / n
+    return out
+
+
+def first_break(bars):
+    """(bar, side) of the first 5-minute close outside the 09:30-09:45 range, plus the range; None if none yet."""
+    rng = [b for b in bars if b["hm"] < "09:45"]
+    if len(rng) < 3 or bars[0]["hm"] != "09:30":
+        return None
+    hi, lo = max(b["h"] for b in rng), min(b["l"] for b in rng)
+    for b in bars:
+        if b["hm"] >= "09:45" and (b["c"] > hi or b["c"] < lo):
+            return {"bar": b["hm"], "side": "buy" if b["c"] > hi else "sell", "hi": hi, "lo": lo}
+    return None
+
+
+def plan_pair(bars_by_sym, s, equity, max_risk=None, sma=None):
+    """Live entry rule since 2026-11-27 (see '17 - Day Trader Research'): trade a symbol only once BOTH SPY and
+    QQQ have closed outside their opening ranges in the SAME direction, and only in the direction of its
+    20-day trend. Entry at the bar that completes the confirmation; stop at the far side of the range;
+    target 1.5x the range from the entry. Returns a plan, {'skip': why} (stop for the day) or None (wait)."""
+    other = next(x for x in SYMBOLS if x != s)
+    mine, theirs = bars_by_sym.get(s) or [], bars_by_sym.get(other) or []
+    a, b = first_break(mine) if mine else None, first_break(theirs) if theirs else None
+    if not a:
+        return None
+    if not b:
+        return {"wait": f"broke {'up' if a['side'] == 'buy' else 'down'} at {a['bar']} - waiting for {other} to confirm"}
+    if a["side"] != b["side"]:
+        return {"skip": f"{s} and {other} broke opposite ways ({a['bar']} / {b['bar']}) - no trade today"}
+    conf = max(a["bar"], b["bar"])
+    last = mine[-1]
+    if last["hm"] > conf:
+        return {"skip": f"confirmation at {conf} already passed"}
+    if last["hm"] < conf:
+        return None
+    ref = last["c"]
+    if sma is None or s not in sma:
+        return {"skip": "no 20-day trend line available - not trading blind"}
+    up = ref > sma[s]
+    if (a["side"] == "buy") != up:
+        return {"skip": f"breakout {'up' if a['side'] == 'buy' else 'down'} is against the 20-day trend "
+                        f"(price {ref:.2f} vs average {sma[s]:.2f})"}
+    side, hi, lo = a["side"], a["hi"], a["lo"]
+    height = hi - lo
+    stop = lo if side == "buy" else hi
+    per = (ref - stop) if side == "buy" else (stop - ref)
+    if per <= 0:
+        return {"skip": "price already back inside the range"}
+    target = ref + TARGET_X * height if side == "buy" else ref - TARGET_X * height
+    budget = TRADE_RISK_USD if max_risk is None else min(TRADE_RISK_USD, max_risk)
+    qty = min(math.floor(budget / per), math.floor(equity * MAX_POS_X / ref))
+    if qty < 1:
+        return {"skip": "size rounds to zero"}
+    return {"side": side, "qty": qty, "ref": ref, "stop": round(stop, 2), "target": round(target, 2),
+            "risk": round(per * qty, 2), "hi": hi, "lo": lo, "bar": last["hm"], "confirmed": conf}
+
 def todays_orb_orders(api: Alpaca, day: date, both: bool = False):
     after = at(day, "04:00").astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     orders = api.call("GET", f"/v2/orders?status=all&after={after}&limit=500&nested=true")
@@ -243,6 +314,14 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
     done = {o["symbol"] for o in todays_orb_orders(api, day)}
     sides = {o["symbol"]: ("buy" if "-L-" in (o.get("client_order_id") or "") else "sell") for o in todays_orb_orders(api, day)}
     skipped = set()
+    waits = {}
+    sma = None
+    if not flatten_at:
+        try:
+            sma = daily_sma(api, day)
+            log("20-day trend lines: " + ", ".join(f"{k} {v:.2f}" for k, v in sma.items()))
+        except Exception as e:  # noqa: BLE001
+            log(f"trend lines unavailable ({e}) - the opening-range strategy will not trade today")
     skill = None
     if skills:
         from .skill_trader import SkillTrader
@@ -275,14 +354,18 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
                 for s in SYMBOLS:
                     if s in done or s in skipped or not bars.get(s):
                         continue
-                    p = plan(bars[s], eq, left)
+                    p = plan_pair(bars, s, eq, left, sma)
                     if not p:
+                        continue
+                    if "wait" in p:
+                        if waits.get(s) != p["wait"]:
+                            log(f"{s}: {p['wait']}"); waits[s] = p["wait"]
                         continue
                     if "skip" in p:
                         log(f"{s}: {p['skip']}"); skipped.add(s); continue
                     twin = [x for x, sd in sides.items() if x != s and sd == p["side"]]
                     if twin:                 # SPY and QQQ move together: a second same-direction trade gets half the risk
-                        p2 = plan(bars[s], eq, min(left, TRADE_RISK_USD * CORRELATED_RISK_FACTOR))
+                        p2 = plan_pair(bars, s, eq, min(left, TRADE_RISK_USD * CORRELATED_RISK_FACTOR), sma)
                         if not p2 or "skip" in p2:
                             log(f"{s}: same direction as {twin[0]} - half-size trade rounds to nothing, skipped"); skipped.add(s); continue
                         log(f"{s}: same direction as {twin[0]} already open today - risk halved to ${p2['risk']:.0f}")
@@ -293,7 +376,7 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
                             "take_profit": {"limit_price": f"{p['target']:.2f}"}, "stop_loss": {"stop_price": f"{p['stop']:.2f}"}}
                     try:
                         o = api.call("POST", "/v2/orders", body)
-                        log(f"{s}: {'LONG' if p['side'] == 'buy' else 'SHORT'} {p['qty']} after the {p['bar']} bar closed "
+                        log(f"{s}: {'LONG' if p['side'] == 'buy' else 'SHORT'} {p['qty']} - SPY and QQQ both broke the same way by {p['bar']}, with the 20-day trend; price "
                             f"{p['ref']:.2f} (range {p['lo']:.2f}-{p['hi']:.2f}); stop {p['stop']}, target {p['target']}, "
                             f"risk ${p['risk']:.0f} - order {o.get('id', '')[:8]}")
                         done.add(s); sides[s] = p["side"]; left -= p["risk"]
@@ -386,7 +469,9 @@ def write_note(st, today):
          "> [!success] Real orders in a separate Alpaca paper account",
          "> Two strategies, one account: the Opening Range Breakout rules from [[11 - Day Trading Simulator]] on SPY and QQQ, "
          "and the **day-trader-skill pack** ([[14 - Skill Pack Day Trader]]: scanner → exit plan → news → time machine → sizing) on 30 liquid stocks. "
-         "Real bracket orders, practice money. Risk: **$500 per trade (a second same-direction SPY/QQQ trade gets half), $5,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York.", "",
+         "Real bracket orders, practice money. Risk: **$500 per trade (a second same-direction SPY/QQQ trade gets half), $5,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York (checked, with an alert if anything is left open).", "",
+         "**Entry rule (since 27 Nov 2026):** trade only when SPY **and** QQQ have both broken out of their 09:30-09:45 range the same way, and only in the direction of each one's 20-day trend. "
+         "Over 2016-2026 this beat the original rule in both halves of the history - see [[17 - Day Trader Research]].", "",
          "## Account", "", "| | |", "|---|---|",
          f"| Started | {st.get('start')} with ${s0:,.2f} |",
          f"| **Equity** | **${eq:,.2f}** ({(eq / s0 - 1) * 100:+.2f}%) |" if eq else "| Equity | — |",

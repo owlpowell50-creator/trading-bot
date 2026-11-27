@@ -456,3 +456,29 @@ class FlattenChecks(unittest.TestCase):
         logs = []
         self.assertFalse(dl.flatten(self._api(99), logs.append, tries=3, wait=0))
         self.assertTrue(any("NOT FLAT" in l for l in logs))
+
+
+class PairRule(unittest.TestCase):
+    def bars(self, closes, hi=101.0, lo=99.0):
+        hms = ["09:30", "09:35", "09:40"] + [f"{9 + (45 + 5 * i) // 60:02d}:{(45 + 5 * i) % 60:02d}" for i in range(len(closes))]
+        out = [dict(hm=h, o=100, h=hi, l=lo, c=100) for h in hms[:3]]
+        out += [dict(hm=h, o=c, h=c + .1, l=c - .1, c=c) for h, c in zip(hms[3:], closes)]
+        return out
+
+    def test_waits_for_confirmation_then_trades_with_trend(self):
+        from bot import daytrade_live as dl
+        spy = self.bars([100.5, 101.5])                  # SPY breaks up at 09:50
+        qqq = self.bars([100.5, 100.6])                  # QQQ not yet
+        self.assertIn("wait", dl.plan_pair({"SPY": spy, "QQQ": qqq}, "SPY", 100000, 500, {"SPY": 95, "QQQ": 95}))
+        spy = self.bars([100.5, 101.5, 101.6]); qqq = self.bars([100.5, 100.6, 101.4])   # QQQ confirms at 09:55
+        p = dl.plan_pair({"SPY": spy, "QQQ": qqq}, "SPY", 100000, 500, {"SPY": 95, "QQQ": 95})
+        self.assertEqual(p["side"], "buy"); self.assertEqual(p["confirmed"], "09:55"); self.assertEqual(p["stop"], 99.0)
+        self.assertLessEqual(p["risk"], 500)
+
+    def test_against_trend_and_opposite_breaks_skip(self):
+        from bot import daytrade_live as dl
+        spy = self.bars([101.5]); qqq = self.bars([101.4])
+        self.assertIn("against the 20-day trend", dl.plan_pair({"SPY": spy, "QQQ": qqq}, "SPY", 100000, 500, {"SPY": 105, "QQQ": 95})["skip"])
+        qqq = self.bars([98.5])
+        self.assertIn("opposite", dl.plan_pair({"SPY": spy, "QQQ": qqq}, "SPY", 100000, 500, {"SPY": 95, "QQQ": 95})["skip"])
+        self.assertIn("not trading blind", dl.plan_pair({"SPY": spy, "QQQ": self.bars([101.4])}, "SPY", 100000, 500, None)["skip"])
