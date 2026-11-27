@@ -88,6 +88,21 @@ The 'SPY and QQQ break the same way' filter above peeks ahead: at SPY's breakout
 | Confirmed pair + Trade with the gap (gap and breakout same way) | 2152 | 51% | +0.023 | 1.05 | -0.018 | +0.055 | -52.1 |
 | Confirmed pair + Skip narrow ranges (range < 20% of daily ATR) | 3594 | 49% | -0.001 | 1.00 | -0.049 | +0.037 | -109.4 |
 
+## Exits and stops on the rule now live (pair confirmed + 20-day trend)
+
+| Version | Trades | Win | Avg R | PF | Avg R 2016-20 | Avg R 2021-now | Worst run (R) |
+|---|---|---|---|---|---|---|---|
+| Live rule now, target 1.5x range (live) | 2360 | 53% | +0.051 | 1.12 | -0.024 | +0.110 | -41.3 |
+| Live rule now, target 1.5x range (live), stop at the range middle | 2359 | 41% | +0.022 | 1.03 | -0.068 | +0.093 | -94.5 |
+| Live rule now, target 1.0x range | 2360 | 58% | +0.011 | 1.03 | -0.039 | +0.052 | -38.3 |
+| Live rule now, target 1.0x range, stop at the range middle | 2359 | 46% | -0.032 | 0.94 | -0.091 | +0.016 | -123.6 |
+| Live rule now, target 2.0x range | 2360 | 50% | +0.067 | 1.15 | -0.021 | +0.136 | -39.7 |
+| Live rule now, target 2.0x range, stop at the range middle | 2359 | 38% | +0.046 | 1.07 | -0.063 | +0.133 | -89.0 |
+| Live rule now, target 3.0x range | 2360 | 48% | +0.086 | 1.18 | +0.002 | +0.152 | -33.6 |
+| Live rule now, target 3.0x range, stop at the range middle | 2359 | 36% | +0.078 | 1.12 | -0.037 | +0.168 | -79.5 |
+| Live rule now, target no target, hold to 15:55 | 2360 | 47% | +0.090 | 1.19 | +0.012 | +0.151 | -39.9 |
+| Live rule now, target no target, hold to 15:55, stop at the range middle | 2359 | 36% | +0.086 | 1.13 | -0.026 | +0.174 | -82.4 |
+
 ## By year: live rules vs confirmed pair
 
 | Year | Live trades | Live avg R | Live total R | Pair trades | Pair avg R | Pair total R |
