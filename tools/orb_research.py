@@ -99,6 +99,60 @@ def day_trade(bars, target_x=1.5, last_entry="15:00"):
     return None
 
 
+def first_break(bars):
+    """(index into bars, side, hi, lo) of the first 5-minute close outside the opening range, or None."""
+    if len(bars) < 20 or bars[0][0] != "09:30":
+        return None
+    rng = [b for b in bars if b[0] < "09:45"]
+    if len(rng) < 3:
+        return None
+    hi, lo = max(b[2] for b in rng), min(b[3] for b in rng)
+    for i, b in enumerate(bars):
+        if b[0] < "09:45":
+            continue
+        if b[4] > hi or b[4] < lo:
+            return i, (1 if b[4] > hi else -1), hi, lo
+    return None
+
+
+def confirmed_trade(bars, me, other, target_x=1.5, last_entry="15:00"):
+    """No look-ahead version of 'SPY and QQQ break the same way': a symbol is entered only once BOTH have
+    closed outside their opening ranges in the same direction - at the next bar's open after the later of
+    the two breakouts. If the other symbol breaks the other way first or never breaks, no trade."""
+    a, b = first_break(bars), first_break(other)
+    if not a or not b or a[1] != b[1]:
+        return None
+    i, side, hi, lo = a
+    conf_hm = max(bars[i][0], other[b[0]][0])
+    if conf_hm > last_entry:
+        return None
+    k = next((j for j, x in enumerate(bars) if x[0] > conf_hm), None)
+    if k is None or bars[k][0] >= "15:55":
+        return None
+    entry = bars[k][1]; h = hi - lo
+    stop = lo if side == 1 else hi
+    risk = (entry - stop) * side
+    if risk <= 0:
+        return None
+    tgt = entry + side * target_x * h if target_x else None
+    exit_, how = None, "close"
+    for c in bars[k:]:
+        if c[0] >= "15:55":
+            exit_ = c[1]; break
+        lo_hit = c[3] <= stop if side == 1 else c[2] >= stop
+        op_hit = c[1] <= stop if side == 1 else c[1] >= stop
+        if op_hit: exit_, how = c[1], "stop"; break
+        if lo_hit: exit_, how = stop, "stop"; break
+        if tgt:
+            if (c[1] >= tgt) if side == 1 else (c[1] <= tgt): exit_, how = c[1], "target"; break
+            if (c[2] >= tgt) if side == 1 else (c[3] <= tgt): exit_, how = tgt, "target"; break
+    if exit_ is None:
+        exit_ = bars[-1][4]
+    r = ((exit_ - entry) * side - COST * entry) / risk
+    return dict(side=side, entry=entry, hi=hi, lo=lo, width=h, bar=bars[k][0], r=r, how=how, open=bars[0][1],
+                waited=bars[k][0] != bars[min(i + 1, len(bars) - 1)][0])
+
+
 def features(cache):
     """Daily context per symbol/day, using only information available before the trade."""
     ctx = {}
@@ -196,11 +250,34 @@ def run(http=None):
             if a.get("n", 0) >= 50 and b.get("n", 0) >= 50 and a["avg"] > max(good[i]["first"]["avg"], good[j]["first"]["avg"]) \
                     and b["avg"] > max(good[i]["second"]["avg"], good[j]["second"]["avg"]):
                 combos.append(dict(kind="combo", name=good[i]["name"] + " + " + good[j]["name"], all=al, first=a, second=b, kept=al["n"] / b_all["n"]))
+    # ---- the pair filter done properly (no look-ahead) ----
+    conf = {}
+    for name, tx in targets.items():
+        tr = []
+        for s_, o_ in (("SPY", "QQQ"), ("QQQ", "SPY")):
+            for d, bs in cache.get(s_, {}).items():
+                ob = cache.get(o_, {}).get(d)
+                if not ob or not ctx.get((s_, d)):
+                    continue
+                t = confirmed_trade(bs, s_, ob, tx)
+                if t:
+                    tr.append(dict(t, sym=s_, date=d, **{"f_" + k: v for k, v in ctx[(s_, d)].items()}))
+        conf[name] = sorted(tr, key=lambda x: (x["date"], x["sym"]))
+    cb = conf["1.5x range (live)"]
+    for name, tr in conf.items():
+        al, a, b = split(tr); rows.append(dict(kind="confirmed", name="Confirmed pair, target " + name, all=al, first=a, second=b, kept=al.get("n", 0) / b_all["n"]))
+    for name in ("Trend: trade only with the 20-day average", "With the 5-day move", "Trade with the gap (gap and breakout same way)", "Skip narrow ranges (range < 20% of daily ATR)"):
+        tr = [t for t in cb if filters[name](t)]
+        al, a, b = split(tr); rows.append(dict(kind="confirmed", name="Confirmed pair + " + name, all=al, first=a, second=b, kept=al.get("n", 0) / b_all["n"]))
+    years_c = {}
+    for t in cb:
+        years_c.setdefault(t["date"][:4], []).append(t["r"])
     years = {}
     for t in base:
         years.setdefault(t["date"][:4], []).append(t["r"])
     res = dict(generated=date.today().isoformat(), sessions={s: len(v) for s, v in cache.items()}, base=b_all,
                rows=rows + combos, years={y: stats(v) for y, v in sorted(years.items())},
+               years_confirmed={y: stats(v) for y, v in sorted(years_c.items())},
                exits={k: sum(1 for t in base if t["how"] == k) for k in ("stop", "target", "close")},
                recommended=sorted(good + combos, key=lambda r: -min(r["first"]["avg"], r["second"]["avg"]))[:3])
     OUT.write_text(json.dumps(res, indent=1, default=str))
@@ -231,8 +308,13 @@ def write_note(res):
          "Passes both halves: " + (", ".join(r["name"] for r in res["rows"] if r.get("both_halves")) or "none"), ""]
     if any(r["kind"] == "combo" for r in res["rows"]):
         L += ["## Combinations that beat either filter alone in both halves", "", H] + [_row(r) for r in res["rows"] if r["kind"] == "combo"] + [""]
-    L += ["## Live rules by year", "", "| Year | Trades | Avg R | Total R |", "|---|---|---|---|"] + \
-         [f"| {y} | {s['n']} | {s['avg']:+.3f} | {s['total']:+.1f} |" for y, s in res["years"].items()] + ["",
+    L += ["## The pair rule without hindsight", "",
+          "The 'SPY and QQQ break the same way' filter above peeks ahead: at SPY's breakout you may not yet know which way QQQ will go. "
+          "Here each symbol is entered only after BOTH have broken out the same way, at the next bar after the later breakout - exactly what the live bot could do.", "", H] + \
+         [_row(r) for r in res["rows"] if r["kind"] == "confirmed"] + ["",
+          "## By year: live rules vs confirmed pair", "", "| Year | Live trades | Live avg R | Live total R | Pair trades | Pair avg R | Pair total R |", "|---|---|---|---|---|---|---|"] + \
+         [f"| {y} | {s['n']} | {s['avg']:+.3f} | {s['total']:+.1f} | {res['years_confirmed'].get(y, {}).get('n', 0)} | "
+          f"{res['years_confirmed'].get(y, {}).get('avg', 0):+.3f} | {res['years_confirmed'].get(y, {}).get('total', 0):+.1f} |" for y, s in res["years"].items()] + ["",
          "## Recommendation", ""]
     if res["recommended"]:
         top = res["recommended"][0]
