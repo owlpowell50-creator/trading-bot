@@ -427,3 +427,32 @@ class CarriedTrades(unittest.TestCase):
         t = st["trades"][0]
         self.assertEqual(t["exit"], 720.0); self.assertEqual(t["exit_date"], "2026-11-24")
         self.assertAlmostEqual(t["pnl"], (720.0 - 726.68) * 39, places=2); self.assertTrue(t["carried"])
+
+
+class FlattenChecks(unittest.TestCase):
+    def _api(self, stuck_rounds):
+        state = {"pos": [{"symbol": "SPY", "qty": "84"}], "n": 0}
+        class Api:
+            def call(self, m, p, b=None):
+                if m == "GET" and p.startswith("/v2/orders"):
+                    return []
+                if m == "GET" and p == "/v2/positions":
+                    return list(state["pos"])
+                if m == "DELETE" and p.startswith("/v2/positions"):
+                    state["n"] += 1
+                    if state["n"] > stuck_rounds:
+                        state["pos"] = []
+                return {}
+        return Api()
+
+    def test_retries_until_flat(self):
+        from bot import daytrade_live as dl
+        logs = []
+        self.assertTrue(dl.flatten(self._api(1), logs.append, wait=0))
+        self.assertTrue(any("still open" in l for l in logs))
+
+    def test_reports_when_not_flat(self):
+        from bot import daytrade_live as dl
+        logs = []
+        self.assertFalse(dl.flatten(self._api(99), logs.append, tries=3, wait=0))
+        self.assertTrue(any("NOT FLAT" in l for l in logs))

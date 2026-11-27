@@ -512,6 +512,9 @@ def cmd_daytrade_live(args):
             f.write(f"active={'1' if active else '0'}\n")
     if args.report and active:
         dl.report()
+    if dl.NOT_FLAT:
+        print("day-trading account is NOT flat after the 15:55 close - failing the job so GitHub sends an alert")
+        return 1
     return 0
 
 

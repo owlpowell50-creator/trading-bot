@@ -163,16 +163,41 @@ def risk_left(api: Alpaca, start_eq: float, equity: float) -> float:
     return DAY_RISK_USD - used
 
 
-def flatten(api: Alpaca, log):
-    try:
-        api.call("DELETE", "/v2/orders")
-    except Exception as e:  # noqa: BLE001
-        log(f"cancel orders: {e}")
-    try:
-        api.call("DELETE", "/v2/positions?cancel_orders=true")
-    except Exception as e:  # noqa: BLE001
-        log(f"close positions: {e}")
-    log("flat: all orders cancelled, all positions closed")
+NOT_FLAT = False
+
+
+def flatten(api: Alpaca, log, tries: int = 8, wait: float = 4.0):
+    """Close everything and CHECK it worked. Alpaca's bulk close can silently skip a position while its
+    bracket legs are still being cancelled (that is how SPY was carried overnight on 2026-11-24), so we
+    cancel, wait for the orders to clear, close, then re-check positions and retry symbol by symbol."""
+    def safe(m, p):
+        try:
+            return api.call(m, p)
+        except Exception as e:  # noqa: BLE001
+            log(f"{m} {p}: {e}")
+            return None
+    safe("DELETE", "/v2/orders")
+    for _ in range(tries):
+        if not (safe("GET", "/v2/orders?status=open") or []):
+            break
+        time.sleep(wait)
+    safe("DELETE", "/v2/positions?cancel_orders=true")
+    left = []
+    for k in range(tries):
+        time.sleep(wait if k else wait / 2)
+        left = safe("GET", "/v2/positions")
+        if left is None:
+            continue
+        if not left:
+            log("flat: all orders cancelled, all positions closed (checked)")
+            return True
+        log("still open after close: " + ", ".join(f"{p['symbol']} {p['qty']}" for p in left) + f" - retry {k + 1}")
+        safe("DELETE", "/v2/orders")
+        for p in left:
+            safe("DELETE", f"/v2/positions/{p['symbol']}")
+    log("WARNING: NOT FLAT - could not close " + ", ".join(f"{p['symbol']} {p['qty']}" for p in (left or [])) +
+        ". Close them by hand in the Alpaca paper account.")
+    return False
 
 
 def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int = 20, log=print, api=None,
@@ -228,7 +253,10 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
     while True:
         now = et_now()
         if flat_t and now >= flat_t:
-            flatten(api, log); break
+            if not flatten(api, log):
+                global NOT_FLAT
+                NOT_FLAT = True
+            break
         if now >= end:
             break
         if now < at(day, "15:00"):
