@@ -72,21 +72,37 @@ Passes both halves: Trend: trade only with the 20-day average, Trend: trade only
 | Trade with the gap (gap and breakout same way) + With the 5-day move | 1354 | 51% | +0.041 | 1.09 | +0.032 | +0.048 | -19.2 |
 | SPY and QQQ break the same way + With the 5-day move | 2134 | 53% | +0.101 | 1.23 | +0.052 | +0.141 | -27.1 |
 
-## Live rules by year
+## The pair rule without hindsight
 
-| Year | Trades | Avg R | Total R |
-|---|---|---|---|
-| 2016 | 401 | -0.095 | -38.2 |
-| 2017 | 498 | -0.112 | -55.6 |
-| 2018 | 498 | -0.041 | -20.5 |
-| 2019 | 498 | -0.046 | -23.0 |
-| 2020 | 500 | -0.079 | -39.7 |
-| 2021 | 502 | +0.083 | +41.5 |
-| 2022 | 500 | +0.021 | +10.3 |
-| 2023 | 498 | -0.007 | -3.6 |
-| 2024 | 504 | -0.003 | -1.3 |
-| 2025 | 500 | +0.049 | +24.6 |
-| 2026 | 453 | -0.020 | -9.1 |
+The 'SPY and QQQ break the same way' filter above peeks ahead: at SPY's breakout you may not yet know which way QQQ will go. Here each symbol is entered only after BOTH have broken out the same way, at the next bar after the later breakout - exactly what the live bot could do.
+
+| Version | Trades | Win | Avg R | PF | Avg R 2016-20 | Avg R 2021-now | Worst run (R) |
+|---|---|---|---|---|---|---|---|
+| Confirmed pair, target 1.5x range (live) | 4305 | 50% | -0.002 | 1.00 | -0.055 | +0.039 | -123.6 |
+| Confirmed pair, target 1.0x range | 4305 | 56% | -0.032 | 0.92 | -0.077 | +0.003 | -185.7 |
+| Confirmed pair, target 2.0x range | 4305 | 47% | +0.015 | 1.03 | -0.041 | +0.058 | -99.3 |
+| Confirmed pair, target 3.0x range | 4305 | 44% | +0.023 | 1.05 | -0.031 | +0.066 | -95.6 |
+| Confirmed pair, target no target, hold to 15:55 | 4305 | 43% | +0.023 | 1.05 | -0.033 | +0.067 | -110.6 |
+| Confirmed pair + Trend: trade only with the 20-day average | 2360 | 53% | +0.051 | 1.12 | -0.024 | +0.110 | -61.8 |
+| Confirmed pair + With the 5-day move | 2134 | 52% | +0.036 | 1.08 | -0.013 | +0.076 | -48.7 |
+| Confirmed pair + Trade with the gap (gap and breakout same way) | 2152 | 51% | +0.023 | 1.05 | -0.018 | +0.055 | -52.1 |
+| Confirmed pair + Skip narrow ranges (range < 20% of daily ATR) | 3594 | 49% | -0.001 | 1.00 | -0.049 | +0.037 | -109.4 |
+
+## By year: live rules vs confirmed pair
+
+| Year | Live trades | Live avg R | Live total R | Pair trades | Pair avg R | Pair total R |
+|---|---|---|---|---|---|---|
+| 2016 | 401 | -0.095 | -38.2 | 320 | -0.091 | -29.2 |
+| 2017 | 498 | -0.112 | -55.6 | 372 | -0.146 | -54.5 |
+| 2018 | 498 | -0.041 | -20.5 | 402 | -0.027 | -10.7 |
+| 2019 | 498 | -0.046 | -23.0 | 412 | +0.002 | +0.8 |
+| 2020 | 500 | -0.079 | -39.7 | 382 | -0.025 | -9.7 |
+| 2021 | 502 | +0.083 | +41.5 | 393 | +0.086 | +33.7 |
+| 2022 | 500 | +0.021 | +10.3 | 436 | +0.008 | +3.5 |
+| 2023 | 498 | -0.007 | -3.6 | 390 | +0.026 | +10.0 |
+| 2024 | 504 | -0.003 | -1.3 | 400 | +0.042 | +17.0 |
+| 2025 | 500 | +0.049 | +24.6 | 422 | +0.094 | +39.6 |
+| 2026 | 453 | -0.020 | -9.1 | 376 | -0.025 | -9.4 |
 
 ## Recommendation
 
