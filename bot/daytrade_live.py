@@ -28,7 +28,11 @@ from datetime import date, datetime, timedelta, timezone
 
 from zoneinfo import ZoneInfo
 
-from .daytrade import SYMBOLS, TARGET_X
+from .daytrade import SYMBOLS
+
+# Live target since 2026-11-27: 3x the opening range (was 1.5x). On the pair+trend rule over 2016-2026 it lifted the
+# average trade from -0.024R to +0.002R (2016-20) and +0.110R to +0.152R (2021-now) - see '17 - Day Trader Research'.
+TARGET_X = 3.0
 from .data import ROOT
 from .vault import FM, _write
 
@@ -139,7 +143,7 @@ def plan_pair(bars_by_sym, s, equity, max_risk=None, sma=None):
     """Live entry rule since 2026-11-27 (see '17 - Day Trader Research'): trade a symbol only once BOTH SPY and
     QQQ have closed outside their opening ranges in the SAME direction, and only in the direction of its
     20-day trend. Entry at the bar that completes the confirmation; stop at the far side of the range;
-    target 1.5x the range from the entry. Returns a plan, {'skip': why} (stop for the day) or None (wait)."""
+    target 3x the range from the entry. Returns a plan, {'skip': why} (stop for the day) or None (wait)."""
     other = next(x for x in SYMBOLS if x != s)
     mine, theirs = bars_by_sym.get(s) or [], bars_by_sym.get(other) or []
     a, b = first_break(mine) if mine else None, first_break(theirs) if theirs else None
@@ -495,7 +499,7 @@ def write_note(st, today):
          "> Two strategies, one account: the Opening Range Breakout rules from [[11 - Day Trading Simulator]] on SPY and QQQ, "
          "and the **day-trader-skill pack** ([[14 - Skill Pack Day Trader]]: scanner → exit plan → news → time machine → sizing) on 30 liquid stocks. "
          "Real bracket orders, practice money. Risk: **$500 per trade (a second same-direction SPY/QQQ trade gets half), $5,000 a day** across both (losses so far + what open trades could lose at their stops). Flat every day by 15:55 New York (checked, with an alert if anything is left open).", "",
-         "**Entry rule (since 27 Nov 2026):** trade only when SPY **and** QQQ have both broken out of their 09:30-09:45 range the same way, and only in the direction of each one's 20-day trend. "
+         "**Entry rule (since 27 Nov 2026):** trade only when SPY **and** QQQ have both broken out of their 09:30-09:45 range the same way, and only in the direction of each one's 20-day trend. Target: 3x the opening range (stop: the far side of it). "
          "Over 2016-2026 this beat the original rule in both halves of the history - see [[17 - Day Trader Research]].", "",
          "## Account", "", "| | |", "|---|---|",
          f"| Started | {st.get('start')} with ${s0:,.2f} |",

@@ -287,7 +287,7 @@ class LiveDayTrader(unittest.TestCase):
         from bot.daytrade_live import plan
         p = plan(self._bars([(100, 101, 99, 100)] * 3 + [(100.5, 101.6, 100.4, 101.4)]), 25000)
         self.assertEqual(p["side"], "buy"); self.assertEqual(p["stop"], 99.0)
-        self.assertAlmostEqual(p["target"], round(101.4 + 1.5 * 2, 2))
+        self.assertAlmostEqual(p["target"], round(101.4 + 3.0 * 2, 2))
         self.assertLessEqual(p["qty"] * 101.4, 25000 * 2.0 + 1)
 
     def test_plan_skips_old_breakout(self):
