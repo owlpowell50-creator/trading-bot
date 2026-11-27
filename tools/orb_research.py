@@ -341,12 +341,15 @@ def write_note(res):
          [f"| {y} | {s['n']} | {s['avg']:+.3f} | {s['total']:+.1f} | {res['years_adopted'].get(y, {}).get('n', 0)} | "
           f"{res['years_adopted'].get(y, {}).get('avg', 0):+.3f} | {res['years_adopted'].get(y, {}).get('total', 0):+.1f} |" for y, s in res["years"].items()] + ["",
          "## Recommendation", ""]
-    if res["recommended"]:
-        top = res["recommended"][0]
-        L += [f"**{top['name']}** — keeps {top['kept']:.0%} of trades; average R {top['first']['avg']:+.3f} in 2016-20 and {top['second']['avg']:+.3f} in 2021-now "
-              f"(live rules: {next(r for r in res['rows'] if r['name'] == '1.5x range (live)')['first']['avg']:+.3f} / {next(r for r in res['rows'] if r['name'] == '1.5x range (live)')['second']['avg']:+.3f})."]
-    else:
-        L += ["No filter improved both halves. The live rules stay as they are."]
+    live_row = next((r for r in res["rows"] if r["name"] == "Live rule now, target 3.0x range"), None)
+    if live_row:
+        ya = res.get("years_adopted", {})
+        pos = sum(1 for v in ya.values() if v.get("avg", 0) > 0)
+        L += [f"**Live since 30 Nov 2026:** both SPY and QQQ must break out the same way, only with the 20-day trend, target 3x the opening range. "
+              f"{live_row['all']['n']:,} trades since 2016, average {live_row['all']['avg']:+.3f}R ({live_row['first']['avg']:+.3f} in 2016-20, "
+              f"{live_row['second']['avg']:+.3f} in 2021-now), profitable in {pos} of {len(ya)} calendar years. "
+              "Chosen from the tests above, so expect live results somewhat below these numbers. The Bot Brain compares the two every day.",
+              "", "Plain-English summary: [[13 - The Live Rules and the Evidence]]."]
     L += ["", "Back to [[12 - Live Day Trading]] · [[16 - Bot Brain]]", ""]
     _write(ROOT / "17 - Day Trader Research.md", "\n".join(L))
 
