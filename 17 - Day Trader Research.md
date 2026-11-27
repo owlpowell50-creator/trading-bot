@@ -121,6 +121,8 @@ The 'SPY and QQQ break the same way' filter above peeks ahead: at SPY's breakout
 
 ## Recommendation
 
-**SPY and QQQ break the same way + With the 5-day move** — keeps 40% of trades; average R +0.052 in 2016-20 and +0.141 in 2021-now (live rules: -0.074 / +0.021).
+**Live since 30 Nov 2026:** both SPY and QQQ must break out the same way, only with the 20-day trend, target 3x the opening range. 2,360 trades since 2016, average +0.086R (+0.002 in 2016-20, +0.152 in 2021-now), profitable in 9 of 11 calendar years. Chosen from the tests above, so expect live results somewhat below these numbers. The Bot Brain compares the two every day.
+
+Plain-English summary: [[13 - The Live Rules and the Evidence]].
 
 Back to [[12 - Live Day Trading]] · [[16 - Bot Brain]]
