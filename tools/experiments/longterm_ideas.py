@@ -137,7 +137,43 @@ def main():
     print(f"{'idea':62s} CAGR   maxDD  Sharpe  S1987-06 S2007-now  both?")
     for r in rows:
         print(f"{r['name'][:62]:62s} {r['cagr']*100:5.2f} {r['mdd']*100:6.1f}  {r['sharpe']:.2f}    {r['s1']:.2f}     {r['s2']:.2f}   {r.get('better_both', '')}")
-    (Path(__file__).resolve().parents[2] / "state" / "longterm_ideas.json").write_text(json.dumps(rows, indent=1))
+    root = Path(__file__).resolve().parents[2]
+    (root / "state" / "longterm_ideas.json").write_text(json.dumps(rows, indent=1))
+    # crisis and recent-year check for anything that passed the Sharpe test
+    cr = json.loads((root / "state" / "crisis.json").read_text())["crises"]
+    live_r = bt.run(s, live, start="1987-06-01", cost_bps=cfg["cost_bps"], band=cfg["no_trade_band"])
+    from bot.vault import FM, _write
+    L = [FM.format(type="research", updated=str(__import__("datetime").date.today()), extra_tags="\n  - long-term\n  - research"),
+         "# 18 - Long-Term Research", "",
+         "New ideas for the long-term bot, each a small change to the live strategy, replayed 1987-2026 with the live costs and 10% no-trade band. "
+         "An idea has to (1) raise the Sharpe ratio in **both** halves of the history (1987-2006 and 2007-now), (2) not deepen the worst fall, "
+         "(3) not do clearly worse in the crises and recent years, and (4) beat the live bot in more than half of 2,000 resampled histories. "
+         "Already-tested ideas live in [[00 - Variant Lab]] and [[Experiment — Faster Re-entry After a Crash]].", "",
+         "| Idea | Growth / yr | Worst fall | Sharpe | Sharpe 1987-2006 | Sharpe 2007-now | Passes step 1-2 |", "|---|---|---|---|---|---|---|"]
+    for r in rows:
+        L.append(f"| {r['name']} | {r['cagr']*100:.2f}% | {r['mdd']*100:.1f}% | {r['sharpe']:.2f} | {r['s1']:.2f} | {r['s2']:.2f} | {'yes' if r.get('better_both') else ('—' if r['name'] == 'Live bot' else 'no')} |")
+    for strat, r in zip(ideas[1:], rows[1:]):
+        if not r.get("better_both"):
+            continue
+        rr = bt.run(s, strat, start="1987-06-01", cost_bps=cfg["cost_bps"], band=cfg["no_trade_band"])
+        bb = bt.block_bootstrap_beat(rr, live_r)
+        L += ["", f"## Closer look: {r['name']}", "", "| Crisis | Live bot | With the idea |", "|---|---|---|"]
+        for c in cr:
+            a, b = bt.window_return(live_r, c["start"], c["end"]), bt.window_return(rr, c["start"], c["end"])
+            if a is not None and b is not None:
+                L.append(f"| {c['name']} | {a*100:+.1f}% | {b*100:+.1f}% |")
+        L += ["", "| Year | Live bot | With the idea |", "|---|---|---|"]
+        worse = 0
+        for y in range(2016, 2027):
+            a, b = bt.window_return(live_r, f"{y-1}-12-31", f"{y}-12-31"), bt.window_return(rr, f"{y-1}-12-31", f"{y}-12-31")
+            if a is not None and b is not None:
+                L.append(f"| {y} | {a*100:+.1f}% | {b*100:+.1f}% |"); worse += b < a
+        L += ["", f"Beat the live bot in **{bb['p_beat']*100:.1f}%** of 2,000 resampled histories (growth difference, middle case {bb['cagr_diff_p50']*100:+.2f} points a year).", ""]
+        verdict = bb["p_beat"] > 0.5 and worse <= 5
+        L.append(f"**Verdict: {'adopt' if verdict else 'not adopted'}.** " + (
+            "" if verdict else f"It lowers risk on paper, but it trailed the live bot in {worse} of the last {2027-2016} years and is no better than a coin flip in the resampling test. Small risk gains are not worth weaker recent results."))
+    L += ["", "Back to [[16 - Bot Brain]] · [[03 - Backtest Report]] · [[17 - Day Trader Research]]", ""]
+    _write(root / "18 - Long-Term Research.md", "\n".join(L))
 
 
 if __name__ == "__main__":
