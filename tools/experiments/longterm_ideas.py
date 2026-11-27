@@ -172,6 +172,26 @@ def main():
         verdict = bb["p_beat"] > 0.5 and worse <= 5
         L.append(f"**Verdict: {'adopt' if verdict else 'not adopted'}.** " + (
             "" if verdict else f"It lowers risk on paper, but it trailed the live bot in {worse} of the last {2027-2016} years and is no better than a coin flip in the resampling test. Small risk gains are not worth weaker recent results."))
+    tj = root / "state" / "tranching.json"
+    if tj.exists():
+        t = json.loads(tj.read_text())
+        L += ["", "## Two tranches (half rebalanced at month-end, half mid-month)", "",
+              "Same signal, same costs; only the trading day is spread out so one unlucky date matters less.", "",
+              "| Version | Growth / yr | Worst fall | Sharpe | Sharpe 1987-2006 | Sharpe 2007-now |", "|---|---|---|---|---|---|"]
+        for k in ("Live (month-end only)", "Mid-month only", "Two tranches, half each"):
+            r = t[k]; L.append(f"| {k} | {r['cagr']*100:.2f}% | {r['mdd']*100:.1f}% | {r['sharpe']:.2f} | {r['s1']:.2f} | {r['s2']:.2f} |")
+        L += ["", f"Beat the live bot in {t['bootstrap']['p_beat']*100:.0f}% of resampled histories. **Not adopted.**", ""]
+        sc = t.get("rebalance_day_scan")
+        if sc:
+            import statistics as _st
+            md = [x["mdd"] for x in sc]; cg = [x["cagr"] for x in sc]
+            L += ["## How much the worst fall depends on the rebalance day", "",
+                  "The identical strategy, deciding on a different day of the month. Growth barely changes; the worst fall changes a lot, mostly through when it caught the COVID crash.", "",
+                  "| Decides on | Growth / yr | Worst fall | Sharpe | Bottom of worst fall |", "|---|---|---|---|---|"] + \
+                 [f"| {x['day'] if isinstance(x['day'], str) else 'day ' + str(x['day'])} | {x['cagr']*100:.2f}% | {x['mdd']*100:.1f}% | {x['sharpe']:.2f} | {x['trough']} |" for x in sc] + ["",
+                  f"**What this means:** expect about {_st.median(cg)*100:.1f}% a year whichever day it trades, but plan for a worst fall of about "
+                  f"{_st.median(md)*100:.0f}% (typical) and up to {min(md)*100:.0f}% - not the {sc[-1]['mdd']*100:.1f}% the month-end backtest shows. "
+                  "The live risk limit (stop and ask at -25%) sits inside that range, so an unlucky year could trigger it - that would be the limit doing its job, not a malfunction.", ""]
     L += ["", "Back to [[16 - Bot Brain]] · [[03 - Backtest Report]] · [[17 - Day Trader Research]]", ""]
     _write(root / "18 - Long-Term Research.md", "\n".join(L))
 

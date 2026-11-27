@@ -246,7 +246,7 @@ def think(today: str | None = None):
     if dd is not None:
         thoughts.append(f"live account {pct(dd)} from its high")
         if dd < -0.08:
-            alerts.append(("amber", f"live long-term account is {pct(dd)} below its high — the backtest's worst was −17.6%"))
+            alerts.append(("amber", f"live long-term account is {pct(dd)} below its high — the backtest's worst was −17.6% at month-end and −14% to −29% depending on the rebalance day (see 18 - Long-Term Research)"))
     if stress:
         worst = min(stress.items(), key=lambda kv: kv[1])
         thoughts.append(f"worst stress scenario for today's holdings: {worst[0].lower()} {pct(worst[1])}")

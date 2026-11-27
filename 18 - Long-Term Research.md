@@ -63,4 +63,38 @@ Beat the live bot in **49.5%** of 2,000 resampled histories (growth difference, 
 
 **Verdict: not adopted.** It lowers risk on paper, but it trailed the live bot in 9 of the last 11 years and is no better than a coin flip in the resampling test. Small risk gains are not worth weaker recent results.
 
+## Two tranches (half rebalanced at month-end, half mid-month)
+
+Same signal, same costs; only the trading day is spread out so one unlucky date matters less.
+
+| Version | Growth / yr | Worst fall | Sharpe | Sharpe 1987-2006 | Sharpe 2007-now |
+|---|---|---|---|---|---|
+| Live (month-end only) | 9.37% | -17.6% | 0.99 | 1.42 | 0.76 |
+| Mid-month only | 8.82% | -29.1% | 0.92 | 1.39 | 0.68 |
+| Two tranches, half each | 9.11% | -17.6% | 0.98 | 1.42 | 0.75 |
+
+Beat the live bot in 28% of resampled histories. **Not adopted.**
+
+## How much the worst fall depends on the rebalance day
+
+The identical strategy, deciding on a different day of the month. Growth barely changes; the worst fall changes a lot, mostly through when it caught the COVID crash.
+
+| Decides on | Growth / yr | Worst fall | Sharpe | Bottom of worst fall |
+|---|---|---|---|---|
+| day 3 | 9.48% | -16.4% | 1.01 | 2018-12-24 |
+| day 5 | 9.54% | -17.4% | 1.02 | 2011-08-08 |
+| day 8 | 9.52% | -20.7% | 1.03 | 2009-08-17 |
+| day 10 | 9.62% | -15.4% | 1.02 | 2009-08-17 |
+| day 12 | 9.48% | -26.3% | 0.98 | 2020-03-12 |
+| day 15 | 9.06% | -29.1% | 0.95 | 2020-03-18 |
+| day 18 | 9.12% | -22.6% | 0.96 | 2023-02-24 |
+| day 20 | 9.13% | -27.0% | 0.96 | 2020-03-23 |
+| day 22 | 8.84% | -26.8% | 0.92 | 2020-03-23 |
+| day 25 | 10.19% | -17.3% | 1.08 | 2020-03-18 |
+| day 27 | 10.26% | -14.2% | 1.09 | 2018-12-24 |
+| month-end (live) | 9.59% | -17.6% | 1.02 | 2016-01-20 |
+
+**What this means:** expect about 9.5% a year whichever day it trades, but plan for a worst fall of about -19% (typical) and up to -29% - not the -17.6% the month-end backtest shows. The live risk limit (stop and ask at -25%) sits inside that range, so an unlucky year could trigger it - that would be the limit doing its job, not a malfunction.
+
+
 Back to [[16 - Bot Brain]] · [[03 - Backtest Report]] · [[17 - Day Trader Research]]
