@@ -1,0 +1,95 @@
+---
+type: research
+department: trading
+department_color: "#22C55E"
+cssclasses:
+  - dept-trading
+generated: trading-bot
+updated: 2026-11-27
+tags:
+  - type/research
+  - department/trading
+  - trading-bot
+  - day-trading
+  - research
+---
+
+# 17 - Day Trader Research
+
+The live day trader's exact rules replayed on every session since 2016 for SPY and QQQ (5,482 symbol-days of real 5-minute prices), measured in R (1R = the planned risk on a trade, so +0.10 means each trade earns a tenth of what it risks, on average). Costs of 2 bp per round trip are included.
+
+**Live rules:** 5,352 trades, 48% winners, average **-0.021R**, profit factor 0.96. Exits: 2,281 stops, 1,842 targets, 1,229 at the 15:55 close.
+
+A change only counts if it improves **both** halves of the history (2016-2020 and 2021-now). Anything that helps in one half only is probably luck.
+
+## Targets
+
+| Version | Trades | Win | Avg R | PF | Avg R 2016-20 | Avg R 2021-now | Worst run (R) |
+|---|---|---|---|---|---|---|---|
+| 1.5x range (live) | 5352 | 48% | -0.021 | 0.96 | -0.074 | +0.021 | -191.4 |
+| 1.0x range | 5352 | 54% | -0.048 | 0.89 | -0.087 | -0.017 | -264.5 |
+| 2.0x range | 5352 | 44% | -0.008 | 0.99 | -0.065 | +0.039 | -170.8 |
+| 3.0x range | 5352 | 42% | +0.007 | 1.01 | -0.048 | +0.052 | -127.8 |
+| no target, hold to 15:55 | 5352 | 41% | +0.006 | 1.01 | -0.048 | +0.050 | -152.6 |
+
+## Filters (on the live 1.5x target)
+
+| Filter | Trades | Win | Avg R | PF | Avg R 2016-20 | Avg R 2021-now | Worst run (R) |
+|---|---|---|---|---|---|---|---|
+| Trend: trade only with the 20-day average | 2887 | 50% | +0.025 | 1.05 | -0.038 | +0.076 | -67.7 |
+| Trend: trade only with the 50-day average | 2883 | 49% | +0.005 | 1.01 | -0.043 | +0.045 | -78.3 |
+| Skip wide ranges (range > 60% of daily ATR) | 5069 | 47% | -0.022 | 0.96 | -0.073 | +0.018 | -175.9 |
+| Skip narrow ranges (range < 20% of daily ATR) | 4429 | 48% | -0.014 | 0.97 | -0.060 | +0.023 | -144.1 |
+| Breakout before 10:30 only | 4775 | 48% | -0.014 | 0.97 | -0.063 | +0.023 | -142.6 |
+| Breakout after 10:30 only | 577 | 45% | -0.079 | 0.82 | -0.151 | +0.003 | -63.8 |
+| Trade with the gap (gap and breakout same way) | 2667 | 48% | -0.004 | 0.99 | -0.047 | +0.030 | -66.2 |
+| Skip big gaps (over 1%) | 4710 | 47% | -0.030 | 0.94 | -0.082 | +0.014 | -195.9 |
+| Skip high-volatility regimes (20-day vol > 25%) | 4551 | 48% | -0.021 | 0.96 | -0.071 | +0.020 | -158.8 |
+| Only high-volatility regimes (20-day vol > 18%) | 1750 | 46% | -0.050 | 0.90 | -0.074 | -0.034 | -101.5 |
+| Longs only | 2784 | 50% | +0.002 | 1.00 | -0.024 | +0.024 | -53.4 |
+| Shorts only | 2568 | 45% | -0.047 | 0.91 | -0.129 | +0.018 | -154.7 |
+| SPY and QQQ break the same way | 4306 | 52% | +0.065 | 1.15 | +0.013 | +0.107 | -38.9 |
+| Against yesterday's move (mean reversion) | 2695 | 47% | -0.034 | 0.93 | -0.075 | +0.002 | -119.9 |
+| With the 5-day move | 2661 | 49% | -0.002 | 1.00 | -0.048 | +0.037 | -83.8 |
+
+Passes both halves: Trend: trade only with the 20-day average, Trend: trade only with the 50-day average, Skip narrow ranges (range < 20% of daily ATR), Breakout before 10:30 only, Trade with the gap (gap and breakout same way), Longs only, SPY and QQQ break the same way, With the 5-day move
+
+## Combinations that beat either filter alone in both halves
+
+| Version | Trades | Win | Avg R | PF | Avg R 2016-20 | Avg R 2021-now | Worst run (R) |
+|---|---|---|---|---|---|---|---|
+| Trend: trade only with the 20-day average + Skip narrow ranges (range < 20% of daily ATR) | 2409 | 50% | +0.030 | 1.07 | -0.035 | +0.085 | -62.6 |
+| Trend: trade only with the 20-day average + Trade with the gap (gap and breakout same way) | 1668 | 52% | +0.064 | 1.14 | +0.016 | +0.104 | -26.6 |
+| Trend: trade only with the 20-day average + SPY and QQQ break the same way | 2341 | 55% | +0.118 | 1.28 | +0.042 | +0.179 | -32.9 |
+| Trend: trade only with the 50-day average + Skip narrow ranges (range < 20% of daily ATR) | 2379 | 49% | +0.008 | 1.02 | -0.041 | +0.051 | -66.1 |
+| Trend: trade only with the 50-day average + Trade with the gap (gap and breakout same way) | 1635 | 51% | +0.051 | 1.11 | +0.009 | +0.086 | -25.0 |
+| Trend: trade only with the 50-day average + SPY and QQQ break the same way | 2340 | 53% | +0.093 | 1.22 | +0.036 | +0.140 | -29.1 |
+| Skip narrow ranges (range < 20% of daily ATR) + Breakout before 10:30 only | 3901 | 48% | -0.004 | 0.99 | -0.047 | +0.030 | -108.6 |
+| Skip narrow ranges (range < 20% of daily ATR) + Trade with the gap (gap and breakout same way) | 2221 | 48% | -0.003 | 0.99 | -0.044 | +0.031 | -63.5 |
+| Breakout before 10:30 only + Trade with the gap (gap and breakout same way) | 2382 | 49% | +0.006 | 1.01 | -0.028 | +0.032 | -44.5 |
+| Trade with the gap (gap and breakout same way) + Longs only | 1565 | 51% | +0.033 | 1.07 | +0.004 | +0.057 | -25.7 |
+| Trade with the gap (gap and breakout same way) + SPY and QQQ break the same way | 2152 | 53% | +0.093 | 1.21 | +0.052 | +0.125 | -23.1 |
+| Trade with the gap (gap and breakout same way) + With the 5-day move | 1354 | 51% | +0.041 | 1.09 | +0.032 | +0.048 | -19.2 |
+| SPY and QQQ break the same way + With the 5-day move | 2134 | 53% | +0.101 | 1.23 | +0.052 | +0.141 | -27.1 |
+
+## Live rules by year
+
+| Year | Trades | Avg R | Total R |
+|---|---|---|---|
+| 2016 | 401 | -0.095 | -38.2 |
+| 2017 | 498 | -0.112 | -55.6 |
+| 2018 | 498 | -0.041 | -20.5 |
+| 2019 | 498 | -0.046 | -23.0 |
+| 2020 | 500 | -0.079 | -39.7 |
+| 2021 | 502 | +0.083 | +41.5 |
+| 2022 | 500 | +0.021 | +10.3 |
+| 2023 | 498 | -0.007 | -3.6 |
+| 2024 | 504 | -0.003 | -1.3 |
+| 2025 | 500 | +0.049 | +24.6 |
+| 2026 | 453 | -0.020 | -9.1 |
+
+## Recommendation
+
+**SPY and QQQ break the same way + With the 5-day move** — keeps 40% of trades; average R +0.052 in 2016-20 and +0.141 in 2021-now (live rules: -0.074 / +0.021).
+
+Back to [[12 - Live Day Trading]] · [[16 - Bot Brain]]
