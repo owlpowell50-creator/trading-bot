@@ -103,6 +103,13 @@ The 'SPY and QQQ break the same way' filter above peeks ahead: at SPY's breakout
 | Live rule now, target no target, hold to 15:55 | 2360 | 47% | +0.090 | 1.19 | +0.012 | +0.151 | -39.9 |
 | Live rule now, target no target, hold to 15:55, stop at the range middle | 2359 | 36% | +0.086 | 1.13 | -0.026 | +0.174 | -82.4 |
 
+## Adding more index ETFs
+
+| Version | Trades | Win | Avg R | PF | Avg R 2016-20 | Avg R 2021-now | Worst run (R) |
+|---|---|---|---|---|---|---|---|
+| IWM on the live rule (SPY+QQQ confirm, IWM breaks too, 20-day trend, 3x target) | 907 | 46% | -0.004 | 0.99 | -0.009 | -0.000 | -22.8 |
+| DIA on the live rule (SPY+QQQ confirm, DIA breaks too, 20-day trend, 3x target) | 939 | 45% | -0.028 | 0.94 | -0.106 | +0.043 | -60.6 |
+
 ## By year: original rules vs the rules now live
 
 | Year | Original trades | Original avg R | Original total R | Now-live trades | Now-live avg R | Now-live total R |
