@@ -3,7 +3,8 @@
 #
 # Kept short to stay inside GitHub's free Actions minutes (private repo: 2,000 min/month):
 #   morning job   09:35 -> 10:45 New York   (opening range, breakouts, skill-pack entries)
-#   close job     15:52 -> 15:57 New York   (flatten at 15:55, report, commit)
+#   close job     ~14:20 -> 15:57 New York  (waits, flattens at 15:55, report, commit; starts early because
+#                 GitHub's scheduled runs often arrive 45-60 minutes late)
 # Open trades in between are protected by their bracket orders, which sit at the broker.
 # Two cron lines per job because of daylight saving; the script only proceeds in the right New York hour.
 name: Day trader
@@ -11,8 +12,8 @@ on:
   schedule:
     - cron: "35 13 * * 1-5"
     - cron: "35 14 * * 1-5"
-    - cron: "52 19 * * 1-5"
-    - cron: "52 20 * * 1-5"
+    - cron: "20 18 * * 1-5"     # close job starts ~14:20 New York and waits for 15:55 -
+    - cron: "20 19 * * 1-5"     # GitHub's scheduled runs were arriving 45-60 min late, after the market closed
   workflow_dispatch:
     inputs:
       check:
@@ -49,9 +50,9 @@ jobs:
           git commit -m "Day trader morning decisions $(date -u +%F)"
           for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
   close:
-    if: endsWith(github.event.schedule, '19 * * 1-5') || endsWith(github.event.schedule, '20 * * 1-5')
+    if: endsWith(github.event.schedule, '18 * * 1-5') || endsWith(github.event.schedule, '19 * * 1-5')
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -62,11 +63,13 @@ jobs:
         env:
           APCA_DT_KEY_ID: ${{ secrets.APCA_DT_KEY_ID }}
           APCA_DT_SECRET_KEY: ${{ secrets.APCA_DT_SECRET_KEY }}
-        run: python run.py daytrade-live --until 15:57 --flatten 15:55 --gate-hour 15 --report
+        run: python run.py daytrade-live --until 15:57 --flatten 15:55 --gate-hour 14,15 --report
       - name: Refresh the Bot Brain with today's day-trading results
         if: steps.dt.outputs.active == '1'
         continue-on-error: true
-        run: python -c "from bot import brain; brain.think()"
+        # refresh prices first so the evening Brain uses today's CLOSE, not the 11:00 prices from the daily run
+        # (history.csv is only updated in this job's copy, not committed - the daily job owns that file)
+        run: python -c "from bot import data, brain; data.update_history(); brain.think()"
       - name: Save the report to the repo
         if: steps.dt.outputs.active == '1'
         run: |

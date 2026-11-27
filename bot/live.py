@@ -82,6 +82,13 @@ def realized_pnl(orders: List[dict]) -> Dict[str, float]:
     return out
 
 
+try:
+    from zoneinfo import ZoneInfo
+    _NY = ZoneInfo("America/New_York")
+except Exception:  # noqa: BLE001
+    _NY = timezone.utc
+
+
 def equity_series(snap: dict, start_capital: float, local: List[tuple]) -> List[tuple]:
     """Daily equity: Alpaca's portfolio history, falling back to the bot's own log."""
     ts, eq = snap["history"]["timestamp"], snap["history"]["equity"]
@@ -89,7 +96,7 @@ def equity_series(snap: dict, start_capital: float, local: List[tuple]) -> List[
     for t, e in zip(ts, eq):
         if e is None or e == 0:
             continue
-        rows.append((datetime.fromtimestamp(t, timezone.utc).date().isoformat(), float(e)))
+        rows.append((datetime.fromtimestamp(t, timezone.utc).astimezone(_NY).date().isoformat(), float(e)))   # New York trading date
     if not rows:
         rows = list(local)
     rows = [r for r in rows if r[1] > 0.5 * start_capital]          # drop pre-funding zeros

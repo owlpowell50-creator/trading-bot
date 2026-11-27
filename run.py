@@ -551,7 +551,7 @@ def main():
     tr.add_argument("--no-download", action="store_true")
     sub.add_parser("test")
     dl = sub.add_parser("daytrade-live", help="run the live (paper) opening-range day-trader")
-    dl.add_argument("--until", default="15:57"); dl.add_argument("--flatten"); dl.add_argument("--gate", action="store_true"); dl.add_argument("--gate-hour", type=int)
+    dl.add_argument("--until", default="15:57"); dl.add_argument("--flatten"); dl.add_argument("--gate", action="store_true"); dl.add_argument("--gate-hour", type=lambda x: tuple(int(h) for h in x.split(",")))
     dl.add_argument("--report", action="store_true"); dl.add_argument("--check", action="store_true")
     dm = sub.add_parser("daytrade-month", help="simulate one month of the live day-trader on real 5-minute bars")
     dm.add_argument("--start"); dm.add_argument("--end"); dm.add_argument("--capital", type=float, default=100000.0)

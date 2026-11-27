@@ -284,8 +284,8 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
             "(keys of a SECOND Alpaca paper account) as GitHub secrets.")
         return False
     now = et_now(); day = now.date()
-    gate_hour = 9 if gate is True else gate
-    if gate and now.hour != gate_hour:
+    gate_hours = (9,) if gate is True else (tuple(gate) if isinstance(gate, (tuple, list)) else (gate,))
+    if gate and now.hour not in gate_hours:
         log(f"{now:%H:%M} New York - not this trigger's hour (daylight-saving twin), exiting")
         return False
     clock = api.call("GET", "/v2/clock")
@@ -293,9 +293,7 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
     if not clock.get("is_open") and nxt.date() != day:
         log("market closed today"); return False
     close_t = datetime.fromisoformat(clock["next_close"].replace("Z", "+00:00")).astimezone(NY) if clock.get("next_close") else None
-    if close_t and close_t.date() == day and (close_t.hour, close_t.minute) < (16, 0) and not flatten_at:
-        log(f"early close today ({close_t:%H:%M} New York) - the close job would run too late, so no day trading")
-        return False
+    early = bool(close_t and close_t.date() == day and (close_t.hour, close_t.minute) < (16, 0) and not flatten_at)
     acct = api.call("GET", "/v2/account")
     pos = api.call("GET", "/v2/positions")
     bad = [p["symbol"] for p in pos if p["symbol"] in LONG_TERM]
@@ -312,6 +310,9 @@ def run(until: str, flatten_at: str | None = None, gate: bool = False, poll: int
         flatten(api, log)
         time.sleep(5)
         acct = api.call("GET", "/v2/account"); equity = float(acct["equity"])
+    if early:
+        log(f"early close today ({close_t:%H:%M} New York) - the close job would run too late, so no day trading")
+        return False
     end = at(day, until); flat_t = at(day, flatten_at) if flatten_at else None
     while et_now() < at(day, "09:45") + timedelta(seconds=30) and not flatten_at:
         time.sleep(15)
@@ -468,7 +469,19 @@ def report(today: str | None = None, log=print):
         cid = next((o.get("client_order_id") for o in orders.values() if o["symbol"] == s), "") or ""
         risk = float(cid.split("-r")[-1]) if "-r" in cid else None
         strat = "Skill pack" if cid.startswith("dts-") else "ORB"
-        st["trades"].append({"date": day.isoformat(), "symbol": s, "side": "LONG" if side == "buy" else "SHORT", "qty": q,
+        parent = next((o for o in orders.values() if o["symbol"] == s), {}) or {}
+        how, stop_px, tgt_px = None, None, None
+        for leg in parent.get("legs") or []:
+            if leg.get("type") == "limit":
+                tgt_px = float(leg["limit_price"]) if leg.get("limit_price") else None
+                how = how or ("hit target" if leg.get("status") == "filled" else None)
+            elif leg.get("type") in ("stop", "stop_limit"):
+                stop_px = float(leg["stop_price"]) if leg.get("stop_price") else None
+                how = how or ("stopped out" if leg.get("status") == "filled" else None)
+        if not how and out:
+            ny = datetime.fromisoformat(out[-1]["transaction_time"].replace("Z", "+00:00")).astimezone(NY).strftime("%H:%M")
+            how = "closed at the 15:55 flatten" if ny >= "15:54" else "closed before stop or target"
+        st["trades"].append({"how": how, "stop": stop_px, "target": tgt_px, "date": day.isoformat(), "symbol": s, "side": "LONG" if side == "buy" else "SHORT", "qty": q,
                              "entry": round(ein, 4), "entry_time": entry["transaction_time"][11:16], "exit": round(xp, 4) if xp else None,
                              "exit_time": out[-1]["transaction_time"][11:16] if out else None, "pnl": round(pnl, 2),
                              "r": round(pnl / risk, 2) if risk else None, "risk": risk, "strategy": strat})
@@ -579,6 +592,8 @@ def _exit_kind(t):
     r = t.get("r")
     if not t.get("exit"):
         return "still open"
+    if t.get("how"):
+        return t["how"]
     if t.get("carried"):
         return f"held overnight, closed {t.get('exit_date', 'later')}"
     if r is None:
