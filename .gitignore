@@ -7,3 +7,4 @@ data/series_cache.json
 state/alert.md
 state/alert_title.txt
 data/orb_5min.json.gz
+data/orb_5min_extra.json.gz

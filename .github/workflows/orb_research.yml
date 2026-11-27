@@ -16,7 +16,9 @@ jobs:
           python-version: "3.11"
       - uses: actions/cache@v4
         with:
-          path: data/orb_5min.json.gz
+          path: |
+            data/orb_5min.json.gz
+            data/orb_5min_extra.json.gz
           key: orb-bars-${{ github.run_id }}
           restore-keys: orb-bars-
       - name: Replay the live rules since 2016 and test filters (no trading)

@@ -55,6 +55,65 @@ def load_bars(http, start=START, end=None):
     return cache
 
 
+EXTRA = ["IWM", "DIA"]
+CACHE_X = ROOT / "data" / "orb_5min_extra.json.gz"
+
+
+def load_extra(http, end=None):
+    import bot.daytrade as dtm
+    end = end or (date.today() - timedelta(days=1)).isoformat()
+    cache = json.loads(gzip.open(CACHE_X, "rt").read()) if CACHE_X.exists() else {}
+    have = max((d for s_ in cache.values() for d in s_), default=None)
+    d = date.fromisoformat((date.fromisoformat(have) + timedelta(days=1)).isoformat() if have else START)
+    old = dtm.SYMBOLS
+    dtm.SYMBOLS = EXTRA
+    try:
+        while d.isoformat() <= end:
+            e = min(date(d.year + (d.month + 2) // 12, (d.month + 2) % 12 + 1, 1) - timedelta(days=1), date.fromisoformat(end))
+            raw = fetch_bars(http, d.isoformat(), e.isoformat(), feed="sip")
+            for s_, bars in raw.items():
+                for day, bs in session_bars(bars).items():
+                    cache.setdefault(s_, {})[day] = [[b["hm"], b["o"], b["h"], b["l"], b["c"]] for b in bs]
+            print(f"extra bars {d} .. {e}", flush=True)
+            d = e + timedelta(days=1)
+    finally:
+        dtm.SYMBOLS = old
+    with gzip.open(CACHE_X, "wt") as f:
+        f.write(json.dumps(cache))
+    return cache
+
+
+def extra_trade(xb, spy, qqq, target_x=3.0):
+    """Trade an extra index ETF only when SPY and QQQ have confirmed the same direction AND the ETF itself has
+    broken out that way too; entry at the next bar after the last of the three breakouts."""
+    a, b, c = first_break(spy), first_break(qqq), first_break(xb)
+    if not a or not b or not c or not (a[1] == b[1] == c[1]):
+        return None
+    conf = max(spy[a[0]][0], qqq[b[0]][0], xb[c[0]][0])
+    if conf > "15:00":
+        return None
+    k = next((j for j, x in enumerate(xb) if x[0] > conf), None)
+    if k is None or xb[k][0] >= "15:55":
+        return None
+    side, hi, lo = c[1], c[2], c[3]
+    entry = xb[k][1]; h = hi - lo; stop = lo if side == 1 else hi
+    risk = (entry - stop) * side
+    if risk <= 0:
+        return None
+    tgt = entry + side * target_x * h
+    exit_ = None
+    for x in xb[k:]:
+        if x[0] >= "15:55":
+            exit_ = x[1]; break
+        if (x[1] <= stop) if side == 1 else (x[1] >= stop): exit_ = x[1]; break
+        if (x[3] <= stop) if side == 1 else (x[2] >= stop): exit_ = stop; break
+        if (x[1] >= tgt) if side == 1 else (x[1] <= tgt): exit_ = x[1]; break
+        if (x[2] >= tgt) if side == 1 else (x[3] <= tgt): exit_ = tgt; break
+    if exit_ is None:
+        exit_ = xb[-1][4]
+    return dict(side=side, entry=entry, r=((exit_ - entry) * side - COST * entry) / risk)
+
+
 def day_trade(bars, target_x=1.5, last_entry="15:00"):
     """Live rules on one session. bars: [hm, o, h, l, c]. Returns dict or None."""
     if len(bars) < 20 or bars[0][0] != "09:30":
@@ -291,6 +350,25 @@ def run(http=None):
                     adopted_years.setdefault(t["date"][:4], []).append(t["r"])
             rows.append(dict(kind="adopted", name=f"Live rule now, target {name}" + (", stop at the range middle" if mid else ""),
                              all=al, first=a, second=b, kept=al.get("n", 0) / b_all["n"]))
+    # ---- extra index ETFs on the live rule ----
+    try:
+        xc = load_extra(http)
+        xctx = features(xc)
+        for x in EXTRA:
+            tr = []
+            for d, xb in xc.get(x, {}).items():
+                sp, qq = cache.get("SPY", {}).get(d), cache.get("QQQ", {}).get(d)
+                f = xctx.get((x, d))
+                if not sp or not qq or not f:
+                    continue
+                t = extra_trade(xb, sp, qq)
+                if t and (t["entry"] > f["sma20"]) == (t["side"] == 1):
+                    tr.append(dict(t, date=d))
+            al, a, b = split(tr)
+            rows.append(dict(kind="extra", name=f"{x} on the live rule (SPY+QQQ confirm, {x} breaks too, 20-day trend, 3x target)",
+                             all=al, first=a, second=b, kept=al.get("n", 0) / b_all["n"]))
+    except Exception as e:  # noqa: BLE001
+        print("extra symbols failed:", e)
     years_c = {}
     for t in cb:
         years_c.setdefault(t["date"][:4], []).append(t["r"])
@@ -337,6 +415,7 @@ def write_note(res):
          [_row(r) for r in res["rows"] if r["kind"] == "confirmed"] + ["",
           "## Exits and stops on the rule now live (pair confirmed + 20-day trend)", "", H] + \
          [_row(r) for r in res["rows"] if r["kind"] == "adopted"] + ["",
+          "## Adding more index ETFs", "", H] + [_row(r) for r in res["rows"] if r["kind"] == "extra"] + ["",
           "## By year: original rules vs the rules now live", "", "| Year | Original trades | Original avg R | Original total R | Now-live trades | Now-live avg R | Now-live total R |", "|---|---|---|---|---|---|---|"] + \
          [f"| {y} | {s['n']} | {s['avg']:+.3f} | {s['total']:+.1f} | {res['years_adopted'].get(y, {}).get('n', 0)} | "
           f"{res['years_adopted'].get(y, {}).get('avg', 0):+.3f} | {res['years_adopted'].get(y, {}).get('total', 0):+.1f} |" for y, s in res["years"].items()] + ["",
