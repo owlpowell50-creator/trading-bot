@@ -115,7 +115,7 @@ def first_break(bars):
     return None
 
 
-def confirmed_trade(bars, me, other, target_x=1.5, last_entry="15:00"):
+def confirmed_trade(bars, me, other, target_x=1.5, last_entry="15:00", stop_mid=False):
     """No look-ahead version of 'SPY and QQQ break the same way': a symbol is entered only once BOTH have
     closed outside their opening ranges in the same direction - at the next bar's open after the later of
     the two breakouts. If the other symbol breaks the other way first or never breaks, no trade."""
@@ -130,7 +130,7 @@ def confirmed_trade(bars, me, other, target_x=1.5, last_entry="15:00"):
     if k is None or bars[k][0] >= "15:55":
         return None
     entry = bars[k][1]; h = hi - lo
-    stop = lo if side == 1 else hi
+    stop = (lo if side == 1 else hi) if not stop_mid else (hi + lo) / 2
     risk = (entry - stop) * side
     if risk <= 0:
         return None
@@ -269,6 +269,24 @@ def run(http=None):
     for name in ("Trend: trade only with the 20-day average", "With the 5-day move", "Trade with the gap (gap and breakout same way)", "Skip narrow ranges (range < 20% of daily ATR)"):
         tr = [t for t in cb if filters[name](t)]
         al, a, b = split(tr); rows.append(dict(kind="confirmed", name="Confirmed pair + " + name, all=al, first=a, second=b, kept=al.get("n", 0) / b_all["n"]))
+    # ---- exits and stops on the ADOPTED rule (confirmed pair + 20-day trend) ----
+    trend = filters["Trend: trade only with the 20-day average"]
+    for name, tx in targets.items():
+        for mid in (False, True):
+            tr = []
+            for s_, o_ in (("SPY", "QQQ"), ("QQQ", "SPY")):
+                for d, bs in cache.get(s_, {}).items():
+                    ob = cache.get(o_, {}).get(d)
+                    if not ob or not ctx.get((s_, d)):
+                        continue
+                    t = confirmed_trade(bs, s_, ob, tx, stop_mid=mid)
+                    if t:
+                        t = dict(t, sym=s_, date=d, **{"f_" + k: v for k, v in ctx[(s_, d)].items()})
+                        if trend(t):
+                            tr.append(t)
+            al, a, b = split(tr)
+            rows.append(dict(kind="adopted", name=f"Live rule now, target {name}" + (", stop at the range middle" if mid else ""),
+                             all=al, first=a, second=b, kept=al.get("n", 0) / b_all["n"]))
     years_c = {}
     for t in cb:
         years_c.setdefault(t["date"][:4], []).append(t["r"])
@@ -312,6 +330,8 @@ def write_note(res):
           "The 'SPY and QQQ break the same way' filter above peeks ahead: at SPY's breakout you may not yet know which way QQQ will go. "
           "Here each symbol is entered only after BOTH have broken out the same way, at the next bar after the later breakout - exactly what the live bot could do.", "", H] + \
          [_row(r) for r in res["rows"] if r["kind"] == "confirmed"] + ["",
+          "## Exits and stops on the rule now live (pair confirmed + 20-day trend)", "", H] + \
+         [_row(r) for r in res["rows"] if r["kind"] == "adopted"] + ["",
           "## By year: live rules vs confirmed pair", "", "| Year | Live trades | Live avg R | Live total R | Pair trades | Pair avg R | Pair total R |", "|---|---|---|---|---|---|---|"] + \
          [f"| {y} | {s['n']} | {s['avg']:+.3f} | {s['total']:+.1f} | {res['years_confirmed'].get(y, {}).get('n', 0)} | "
           f"{res['years_confirmed'].get(y, {}).get('avg', 0):+.3f} | {res['years_confirmed'].get(y, {}).get('total', 0):+.1f} |" for y, s in res["years"].items()] + ["",
