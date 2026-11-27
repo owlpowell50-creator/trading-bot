@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-26
+updated: 2026-11-27
 tags:
   - type/day-trading-simulator
   - department/trading
@@ -25,7 +25,7 @@ tags:
 |---|---|
 | Started with | $25,000.00 on 2026-10-26 |
 | **Equity now** | **$25,166.01** (+0.66%) |
-| Days processed through | 2026-11-25 |
+| Days processed through | 2026-11-26 |
 | Instruments | SPY, QQQ |
 
 ## Ledger

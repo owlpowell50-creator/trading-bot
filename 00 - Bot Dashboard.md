@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-26
+updated: 2026-11-27
 tags:
   - type/dashboard
   - department/trading
@@ -15,36 +15,36 @@ tags:
 
 # Trading Bot — Dashboard
 
-> [!info] 🤖 Bot is ACTIVE — last run 2026-11-26 at 16:06: **HOLD**
+> [!info] 🤖 Bot is ACTIVE — last run 2026-11-27 at 16:03: **HOLD**
 > No rebalance due (signal of 2026-10-30 already acted on).
 > Next scheduled rebalance: **2026-12-01** (first trading day of the month). Every other weekday it checks prices and risk, and writes a journal.
 
-**Mode:** `alpaca-paper` · **Region:** `us` · **Strategy:** `CORE` · **Data through:** 2026-11-25
+**Mode:** `alpaca-paper` · **Region:** `us` · **Strategy:** `CORE` · **Data through:** 2026-11-27
 
 ## Account
 
 | | |
 |---|---|
-| Equity | 94,848 |
+| Equity | 95,944 |
 | Started with | 100,000 |
-| Return since start | -5.2% |
+| Return since start | -4.1% |
 | Peak | 99,989 |
-| Drawdown | -5.1% (halt at -25%) |
+| Drawdown | -4.0% (halt at -25%) |
 
 ## Holdings now
 
 | Asset | Weight | Instrument |
 |---|---|---|
 | US stocks (S&P 500) | 38.9% | VOO (US-listed) |
-| Developed ex-US stocks | 37.0% | IEFA (US-listed) |
-| Commodities | 23.6% | PDBC (US-listed) |
+| Developed ex-US stocks | 37.1% | IEFA (US-listed) |
+| Commodities | 23.5% | PDBC (US-listed) |
 | Cash (T-bills) | 0.5% | SGOV (US-listed) |
 
 ```mermaid
 pie showData title What the bot holds now
     "US stocks (S&P 500) (VOO)" : 38.9
-    "Developed ex-US stocks (IEFA)" : 37.0
-    "Commodities (PDBC)" : 23.6
+    "Developed ex-US stocks (IEFA)" : 37.1
+    "Commodities (PDBC)" : 23.5
     "Cash (T-bills) (SGOV)" : 0.5
 ```
 
@@ -52,6 +52,7 @@ pie showData title What the bot holds now
 
 | Date | Status | Equity |
 |---|---|---|
+| [[2026-11-27]] | HOLD | 95,944 |
 | [[2026-11-26]] | HOLD | 94,848 |
 | [[2026-11-25]] | HOLD | 92,968 |
 | [[2026-11-24]] | HOLD | 94,051 |
@@ -63,15 +64,14 @@ pie showData title What the bot holds now
 | [[2026-11-16]] | HOLD | 99,231 |
 | [[2026-11-16]] | HOLD | 99,240 |
 | [[2026-11-13]] | HOLD | 99,471 |
-| [[2026-11-12]] | TRADED | 99,989 |
 
 ## Equity
 ```mermaid
 xychart-beta
     title "Paper account value"
-    x-axis ["11-12", "11-13", "11-16", "11-17", "11-18", "11-19", "11-20", "11-23", "11-24", "11-25", "11-26"]
+    x-axis ["11-12", "11-13", "11-16", "11-17", "11-18", "11-19", "11-20", "11-23", "11-24", "11-25", "11-26", "11-27"]
     y-axis "Value" 92266 --> 100691
-    line [99989.1, 99470.6, 99230.9, 97159.3, 96244.1, 95888.9, 93690.1, 95020.8, 94050.6, 92968.3, 94848.3]
+    line [99989.1, 99470.6, 99230.9, 97159.3, 96244.1, 95888.9, 93690.1, 95020.8, 94050.6, 92968.3, 94848.3, 95944.0]
 ```
 
 ## Notes
