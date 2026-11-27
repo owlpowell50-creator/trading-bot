@@ -482,3 +482,18 @@ class PairRule(unittest.TestCase):
         qqq = self.bars([98.5])
         self.assertIn("opposite", dl.plan_pair({"SPY": spy, "QQQ": qqq}, "SPY", 100000, 500, {"SPY": 95, "QQQ": 95})["skip"])
         self.assertIn("not trading blind", dl.plan_pair({"SPY": spy, "QQQ": self.bars([101.4])}, "SPY", 100000, 500, None)["skip"])
+
+
+class EdgeCheck(unittest.TestCase):
+    def test_flags_a_broken_edge(self):
+        from bot.brain import edge_check
+        res = {"rows": [{"name": "Live rule now, target 3.0x range", "second": {"avg": 0.15}}], "years_confirmed": {}}
+        dt = {"trades": [{"date": "2026-12-%02d" % (1 + k % 28), "strategy": "ORB", "exit": 1, "r": -1.0 if k % 3 else 0.5} for k in range(40)]}
+        out = edge_check(dt, res)
+        self.assertTrue(any(o[0] == "alert" and o[1] == "red" for o in out))
+
+    def test_quiet_when_on_track(self):
+        from bot.brain import edge_check
+        res = {"rows": [{"name": "Live rule now, target 3.0x range", "second": {"avg": 0.15}}], "years_confirmed": {}}
+        dt = {"trades": [{"date": "2026-12-01", "strategy": "ORB", "exit": 1, "r": r} for r in (1.0, -1.0, 2.0, -1.0, 0.2)]}
+        self.assertFalse(any(o[0] == "alert" for o in edge_check(dt, res)))

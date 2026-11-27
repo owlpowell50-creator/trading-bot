@@ -285,6 +285,10 @@ def run(http=None):
                         if trend(t):
                             tr.append(t)
             al, a, b = split(tr)
+            if tx == 3.0 and not mid:
+                adopted_years = {}
+                for t in tr:
+                    adopted_years.setdefault(t["date"][:4], []).append(t["r"])
             rows.append(dict(kind="adopted", name=f"Live rule now, target {name}" + (", stop at the range middle" if mid else ""),
                              all=al, first=a, second=b, kept=al.get("n", 0) / b_all["n"]))
     years_c = {}
@@ -296,6 +300,7 @@ def run(http=None):
     res = dict(generated=date.today().isoformat(), sessions={s: len(v) for s, v in cache.items()}, base=b_all,
                rows=rows + combos, years={y: stats(v) for y, v in sorted(years.items())},
                years_confirmed={y: stats(v) for y, v in sorted(years_c.items())},
+               years_adopted={y: stats(v) for y, v in sorted(adopted_years.items())},
                exits={k: sum(1 for t in base if t["how"] == k) for k in ("stop", "target", "close")},
                recommended=sorted(good + combos, key=lambda r: -min(r["first"]["avg"], r["second"]["avg"]))[:3])
     OUT.write_text(json.dumps(res, indent=1, default=str))
@@ -332,9 +337,9 @@ def write_note(res):
          [_row(r) for r in res["rows"] if r["kind"] == "confirmed"] + ["",
           "## Exits and stops on the rule now live (pair confirmed + 20-day trend)", "", H] + \
          [_row(r) for r in res["rows"] if r["kind"] == "adopted"] + ["",
-          "## By year: live rules vs confirmed pair", "", "| Year | Live trades | Live avg R | Live total R | Pair trades | Pair avg R | Pair total R |", "|---|---|---|---|---|---|---|"] + \
-         [f"| {y} | {s['n']} | {s['avg']:+.3f} | {s['total']:+.1f} | {res['years_confirmed'].get(y, {}).get('n', 0)} | "
-          f"{res['years_confirmed'].get(y, {}).get('avg', 0):+.3f} | {res['years_confirmed'].get(y, {}).get('total', 0):+.1f} |" for y, s in res["years"].items()] + ["",
+          "## By year: original rules vs the rules now live", "", "| Year | Original trades | Original avg R | Original total R | Now-live trades | Now-live avg R | Now-live total R |", "|---|---|---|---|---|---|---|"] + \
+         [f"| {y} | {s['n']} | {s['avg']:+.3f} | {s['total']:+.1f} | {res['years_adopted'].get(y, {}).get('n', 0)} | "
+          f"{res['years_adopted'].get(y, {}).get('avg', 0):+.3f} | {res['years_adopted'].get(y, {}).get('total', 0):+.1f} |" for y, s in res["years"].items()] + ["",
          "## Recommendation", ""]
     if res["recommended"]:
         top = res["recommended"][0]

@@ -150,6 +150,43 @@ def day_trader_view(dt, n_days=10):
             "equity": eq[-1]["equity"] if eq else None, "start_equity": dt.get("start_equity")}
 
 
+RULES_SINCE = "2026-11-30"          # first session under the pair + 20-day trend + 3x target rules
+EXPECTED_ROW = "Live rule now, target 3.0x range"
+
+
+def edge_check(dt, research, since=RULES_SINCE):
+    """Live trades under the current day-trading rules vs what 2016-2026 says to expect.
+    Returns [("thought", text)] / [("alert", level, text)]."""
+    out = []
+    if not research:
+        return out
+    row = next((r for r in research.get("rows", []) if r.get("name") == EXPECTED_ROW), None)
+    if not row:
+        return out
+    exp = row["second"]["avg"]                  # recent-half average: the most relevant expectation
+    rs = [t["r"] for t in (dt or {}).get("trades", []) if t["date"] >= since and t.get("strategy", "ORB") == "ORB"
+          and t.get("exit") is not None and t.get("r") is not None]
+    n = len(rs)
+    if n == 0:
+        out.append(("thought", f"day trader's current rules expect about {exp:+.2f}R a trade (2021-now) - no live trades under them yet"))
+        return out
+    avg = sum(rs) / n
+    sd = (sum((x - avg) ** 2 for x in rs) / max(1, n - 1)) ** 0.5 or 1.0
+    z = (avg - exp) / (sd / n ** 0.5)
+    out.append(("thought", f"day trader under the current rules: {n} trades, average {avg:+.2f}R vs {exp:+.2f}R expected"
+                           + (" - far too few trades to judge yet" if n < 30 else "")))
+    if n >= 30 and z < -2:
+        out.append(("alert", "red", f"day trader is running well below its tested results ({avg:+.2f}R vs {exp:+.2f}R over {n} trades, "
+                                    f"{abs(z):.1f} standard errors) - the edge may have gone; consider pausing it"))
+    elif n >= 15 and z < -1.5:
+        out.append(("alert", "amber", f"day trader is behind its tested results ({avg:+.2f}R vs {exp:+.2f}R over {n} trades) - watch it"))
+    recent = research.get("years_adopted") or {}
+    yrs = sorted(recent)[-2:]
+    if yrs and all(recent[y].get("avg", 0) < 0 for y in yrs):
+        out.append(("alert", "amber", f"the day-trading research shows the current rules losing in {' and '.join(yrs)} - the edge may be fading"))
+    return out
+
+
 def think(today: str | None = None):
     cfg = cfgmod.load()
     s = data.build_series()
@@ -224,6 +261,12 @@ def think(today: str | None = None):
         if dt["skill_reasons"]:
             r0 = dt["skill_reasons"][0]
             thoughts.append(f"skill pack looked at {dt['skill_seen']} breakouts; most common decision: {r0[0]} ({r0[1]})")
+    # 5b is the day trader's edge holding up? compare trades under the current rules with the research
+    try:
+        for t_ in edge_check(_load("daytrade_live.json"), _load("orb_research.json")):
+            (alerts.append(t_[1:]) if t_[0] == "alert" else thoughts.append(t_[1]))
+    except Exception as e:  # noqa: BLE001
+        thoughts.append(f"day-trader edge check unavailable ({e})")
     # 6 data freshness
     age = (date.fromisoformat(today) - date.fromisoformat(s.dates[i])).days
     if age > 4:
