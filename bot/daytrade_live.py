@@ -400,6 +400,31 @@ def check(log=print):
         f"positions {[p['symbol'] for p in pos] or 'none'} long-term ETFs present: {any(p['symbol'] in LONG_TERM for p in pos)}")
     eq = float(a["equity"])
     log(f"CHECK daily risk budget: ${risk_left(api, float(a.get('last_equity') or eq), eq):,.0f} of ${DAY_RISK_USD:,.0f} free")
+    try:
+        sma = daily_sma(api, et_now().date())
+        log("CHECK 20-day trend lines: " + ", ".join(f"{k} {v:.2f}" for k, v in sma.items()))
+        cal0 = api.call("GET", f"/v2/calendar?start={(et_now().date() - timedelta(days=7)).isoformat()}&end={(et_now().date() - timedelta(days=1)).isoformat()}")
+        last = date.fromisoformat(cal0[-1]["date"])
+        q = urllib.parse.urlencode({"symbols": ",".join(SYMBOLS), "timeframe": "5Min", "feed": "sip", "adjustment": "raw",
+                                    "start": at(last, "09:30").astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                    "end": at(last, "15:00").astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "limit": 10000})
+        allb = {s: [dict(b, hm=datetime.fromisoformat(b["t"].replace("Z", "+00:00")).astimezone(NY).strftime("%H:%M")) for b in bs]
+                for s, bs in (api.call("GET", "/v2/stocks/bars?" + q, data=True).get("bars") or {}).items()}
+        sma_last = daily_sma(api, last)
+        seen = {}
+        for k in range(3, max(len(v) for v in allb.values()) + 1):
+            for s in SYMBOLS:
+                if s in seen:
+                    continue
+                p = plan_pair({x: v[:k] for x, v in allb.items()}, s, eq, TRADE_RISK_USD, sma_last)
+                if p and "wait" not in p:
+                    seen[s] = p
+        for s in SYMBOLS:
+            p = seen.get(s)
+            log(f"CHECK new entry rule on {last}: {s} " + ("no breakout" if not p else p.get("skip") or
+                f"{'LONG' if p['side'] == 'buy' else 'SHORT'} {p['qty']} at {p['ref']:.2f} ({p['bar']}), stop {p['stop']}, target {p['target']}, risk ${p['risk']:.0f}"))
+    except Exception as e:  # noqa: BLE001
+        log(f"CHECK new entry rule: {e}")
     from .skill_trader import replay_day
     cal = api.call("GET", f"/v2/calendar?start={(et_now().date() - timedelta(days=7)).isoformat()}&end={(et_now().date() - timedelta(days=1)).isoformat()}")
     if cal:
