@@ -1,7 +1,7 @@
 {
  "date": "2026-11-27",
  "data_through": "2026-11-27",
- "generated": "2026-11-28T13:26Z",
+ "generated": "2026-11-28T15:12Z",
  "thoughts": [
   "if the month ended today I would hold real estate 36%, cash 33%, commodities 30%",
   "that would mean real estate 0% \u2192 36%; cash 1% \u2192 33%; commodities 24% \u2192 30%; foreign stocks 37% \u2192 0% at the next rebalance (1 Dec)",
@@ -14,6 +14,10 @@
   "worst stress scenario for today's holdings: equity crash -20.7%",
   "since 2026-11-12 the live account is -4.0% with US stocks -4.2%; in the 40-year backtest, 10-day stretches with a similar market move left the bot between -3.4% and +1.6% (middle -0.9%) - today's result is worse than most",
   "tracking: live -4.0% vs -4.0% for the rules' own mix over the same days (gap -0.1%)",
+  "tail risk of today's holdings (history since 1987): a 1-in-20 bad day loses -1.6%, a 1-in-20 bad month -6.7%; the average of the worst 1% of months is -19.2%",
+  "after the next rebalance the 1-in-20 bad month would be -4.0% (worst 1% of months -16.4%)",
+  "where the risk comes from: foreign stocks 47%, US stocks 45%, commodities 8% of the portfolio's swings (last year of data)",
+  "unrealised P&L -4,056 USD: US stocks -1,791, foreign stocks -1,387, commodities -877",
   "day trader last 7 sessions: 14 closed trades, 7 winners, avg R -0.18",
   "skill pack looked at 84 breakouts; most common decision: time machine (76)",
   "day trader's current rules expect about +0.15R a trade (2021-now) - no live trades under them yet"
@@ -28,6 +32,45 @@
    "text": "US stocks volatility 31% (1 month) vs 15% normal"
   }
  ],
+ "risk": {
+  "var_1d": {
+   "n": 5235,
+   "horizon": 1,
+   "var95": 0.01609699912063924,
+   "es95": 0.026831316213281463,
+   "var99": 0.03245062808483045,
+   "es99": 0.047934877078661314,
+   "worst": 0.09498294654665025
+  },
+  "var_21d": {
+   "n": 1043,
+   "horizon": 21,
+   "var95": 0.06710978440057104,
+   "es95": 0.10691015897852364,
+   "var99": 0.13853410297776644,
+   "es99": 0.19189647738025015,
+   "worst": 0.2921252898048793
+  },
+  "var_21d_target": {
+   "n": 1043,
+   "horizon": 21,
+   "var95": 0.04009699047517109,
+   "es95": 0.08149241083243916,
+   "var99": 0.11479515873589684,
+   "es99": 0.16370528932394407,
+   "worst": 0.21336197273748275
+  },
+  "risk_contrib": {
+   "INTL": 0.4718830270429819,
+   "COMMOD": 0.07905903490145523,
+   "US": 0.4490579380555628
+  },
+  "attribution": {
+   "INTL": -1387.249442,
+   "COMMOD": -877.319642,
+   "US": -1791.372421
+  }
+ },
  "preview": {
   "target": {
    "COMMOD": 0.30401532271394427,

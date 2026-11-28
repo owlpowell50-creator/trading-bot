@@ -510,3 +510,15 @@ class PerformanceContext(unittest.TestCase):
         self.assertIsNotNone(t); self.assertAlmostEqual(t["live"], curve[-1][1] / curve[0][1] - 1)
         c = brain.context_check(s, strat, cfg, curve)
         self.assertTrue(c is None or 0 <= c["rank"] <= 1)
+
+
+class TailRisk(unittest.TestCase):
+    def test_var_es_ordering_and_cash(self):
+        from bot import brain, data
+        s = data.build_series(); i = len(s.dates) - 1
+        v = brain.hist_var_es(s, {"US": 1.0}, i, 21)
+        self.assertGreater(v["es99"], v["var99"]); self.assertGreater(v["var99"], v["var95"]); self.assertGreater(v["var95"], 0)
+        c = brain.hist_var_es(s, {"CASH": 1.0}, i, 21)
+        self.assertLess(c["var95"], 0.005)            # cash almost never loses money over a month
+        rc = brain.risk_contrib(s, {"US": 0.5, "BONDS": 0.5}, i)
+        self.assertAlmostEqual(sum(rc.values()), 1.0, places=6)

@@ -240,6 +240,66 @@ def context_check(s, strat, cfg, curve):
     return dict(days=n, market=mkt, live=live, n=len(outs), p10=q(0.10), p50=q(0.5), p90=q(0.90), rank=rank)
 
 
+def hist_var_es(s, weights, i, horizon=1, start=252, confs=(0.95, 0.99)):
+    """Historical-simulation VaR and expected shortfall for a FIXED mix, using every overlapping
+    `horizon`-day window of the bot's own total-return series up to day i (1987 onwards).
+    Losses are positive numbers (0.05 = a 5% loss)."""
+    w = {a: x for a, x in weights.items() if x > 1e-6}
+    rets = []
+    for k in range(max(start, horizon), i + 1, 1 if horizon == 1 else 5):
+        r = 0.0
+        for a, x in w.items():
+            lv = s.levels[a]
+            if lv[k] is None or lv[k - horizon] is None:
+                r = None
+                break
+            r += x * (lv[k] / lv[k - horizon] - 1)
+        if r is not None:
+            rets.append(r)
+    if len(rets) < 250:
+        return None
+    rets.sort()
+    out = {"n": len(rets), "horizon": horizon}
+    for c in confs:
+        k = int((1 - c) * len(rets))
+        tail = rets[:max(1, k)]
+        out[f"var{int(c * 100)}"] = -rets[k]
+        out[f"es{int(c * 100)}"] = -sum(tail) / len(tail)
+    out["worst"] = -rets[0]
+    return out
+
+
+def risk_contrib(s, weights, i, n=252):
+    """Share of portfolio variance from each holding (sums to 1), from the last n days of daily returns."""
+    w = {a: x for a, x in weights.items() if a != "CASH" and x > 1e-6}
+    if not w:
+        return {}
+    series = {}
+    for a in w:
+        lv = s.levels[a]
+        r = [lv[k] / lv[k - 1] - 1 for k in range(i - n + 1, i + 1) if lv[k] and lv[k - 1]]
+        if len(r) < n * 0.9:
+            return {}
+        series[a] = r[-min(len(v) for v in [r]):]
+    m = min(len(v) for v in series.values())
+    series = {a: v[-m:] for a, v in series.items()}
+    mean = {a: sum(v) / m for a, v in series.items()}
+    cov = {(a, b): sum((series[a][t] - mean[a]) * (series[b][t] - mean[b]) for t in range(m)) / (m - 1) for a in w for b in w}
+    pvar = sum(w[a] * w[b] * cov[(a, b)] for a in w for b in w)
+    if pvar <= 0:
+        return {}
+    return {a: w[a] * sum(w[b] * cov[(a, b)] for b in w) / pvar for a in w}
+
+
+def attribution(snap):
+    """Unrealised P&L by asset class from the broker snapshot (cost basis vs market value)."""
+    out = {}
+    for p in (snap or {}).get("positions", []):
+        a = ETF.get(p["symbol"], p["symbol"])
+        out[a] = out.get(a, 0.0) + float(p.get("unrealized_pl") or 0)
+    return out
+
+
 def think(today: str | None = None):
     cfg = cfgmod.load()
     s = data.build_series()
@@ -321,6 +381,32 @@ def think(today: str | None = None):
                                         "look for a missed trade, odd fills or idle cash"))
     except Exception as e:  # noqa: BLE001
         thoughts.append(f"performance context unavailable ({e})")
+    # 4c tail risk, risk contribution and P&L attribution
+    try:
+        held_risky = {a: x for a, x in held.items() if x > 0.001}
+        v1 = hist_var_es(s, held_risky, i, 1) if held else None
+        v21 = hist_var_es(s, held_risky, i, 21) if held else None
+        t21 = hist_var_es(s, target, i, 21) if target else None
+        if v1 and v21:
+            thoughts.append(f"tail risk of today's holdings (history since 1987): a 1-in-20 bad day loses {pct(-v1['var95'])}, "
+                            f"a 1-in-20 bad month {pct(-v21['var95'])}; the average of the worst 1% of months is {pct(-v21['es99'])}")
+            if t21:
+                thoughts.append(f"after the next rebalance the 1-in-20 bad month would be {pct(-t21['var95'])} "
+                                f"(worst 1% of months {pct(-t21['es99'])})")
+            if v21["es99"] > 0.20:
+                alerts.append(("amber", f"today's holdings could lose about {pct(v21['es99'])} in a very bad month (worst 1% average) - above 20%"))
+        rc = risk_contrib(s, held, i)
+        if rc:
+            top = sorted(rc.items(), key=lambda kv: -kv[1])
+            thoughts.append("where the risk comes from: " + ", ".join(f"{SHORT.get(a, a)} {x * 100:.0f}%" for a, x in top) +
+                            " of the portfolio's swings (last year of data)")
+        att = attribution(snap)
+        if att:
+            tot = sum(att.values())
+            thoughts.append(f"unrealised P&L {tot:+,.0f} USD: " + ", ".join(f"{SHORT.get(a, a)} {v:+,.0f}" for a, v in sorted(att.items(), key=lambda kv: kv[1])))
+        doc_risk = {"var_1d": v1, "var_21d": v21, "var_21d_target": t21, "risk_contrib": rc, "attribution": att}
+    except Exception as e:  # noqa: BLE001
+        thoughts.append(f"tail-risk analytics unavailable ({e})"); doc_risk = {}
     # 5 day trader
     if dt:
         if dt["unclosed"]:
@@ -344,7 +430,7 @@ def think(today: str | None = None):
         alerts.append(("red", f"price data is {age} days old — the daily job may not be running"))
 
     doc = {"date": today, "data_through": s.dates[i], "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
-           "thoughts": thoughts, "alerts": [{"level": l, "text": t} for l, t in alerts],
+           "thoughts": thoughts, "alerts": [{"level": l, "text": t} for l, t in alerts], "risk": doc_risk,
            "preview": {"target": target, "held": held, "changes": chg}, "scores": scores,
            "flips": fl, "vol": vol, "stress": stress, "drawdown": dd,
            "portfolio_vol": {"now": pv_now, "target": pv_target, "cap": cfg["vol_cap"]}}
