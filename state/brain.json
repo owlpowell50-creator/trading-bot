@@ -1,7 +1,7 @@
 {
  "date": "2026-11-27",
  "data_through": "2026-11-27",
- "generated": "2026-11-27T16:04Z",
+ "generated": "2026-11-28T13:26Z",
  "thoughts": [
   "if the month ended today I would hold real estate 36%, cash 33%, commodities 30%",
   "that would mean real estate 0% \u2192 36%; cash 1% \u2192 33%; commodities 24% \u2192 30%; foreign stocks 37% \u2192 0% at the next rebalance (1 Dec)",
@@ -12,6 +12,8 @@
   "S&P 500 is -0.8% vs its 200-day average and -6.9% from its 1-year high",
   "live account -4.0% from its high",
   "worst stress scenario for today's holdings: equity crash -20.7%",
+  "since 2026-11-12 the live account is -4.0% with US stocks -4.2%; in the 40-year backtest, 10-day stretches with a similar market move left the bot between -3.4% and +1.6% (middle -0.9%) - today's result is worse than most",
+  "tracking: live -4.0% vs -4.0% for the rules' own mix over the same days (gap -0.1%)",
   "day trader last 7 sessions: 14 closed trades, 7 winners, avg R -0.18",
   "skill pack looked at 84 breakouts; most common decision: time machine (76)",
   "day trader's current rules expect about +0.15R a trade (2021-now) - no live trades under them yet"
@@ -36,7 +38,7 @@
    "INTL": 0.370517823231352,
    "COMMOD": 0.23527639658738608,
    "US": 0.38899418573637445,
-   "CASH": 0.005211594444887502
+   "CASH": 0.005211594444887391
   },
   "changes": [
    [
@@ -46,7 +48,7 @@
    ],
    [
     "CASH",
-    0.005211594444887502,
+    0.005211594444887391,
     0.33333333333333337
    ],
    [
@@ -130,33 +132,33 @@
  "vol": {
   "US": {
    "1m": 0.3131010840618903,
-   "3m": 0.19750494317344233,
-   "1y": 0.14947043273591337
+   "3m": 0.1975049431734423,
+   "1y": 0.14947043273591334
   },
   "INTL": {
-   "1m": 0.24973583235842672,
-   "3m": 0.17098586420431933,
-   "1y": 0.16930879371781693
+   "1m": 0.2497358323584267,
+   "3m": 0.1709858642043193,
+   "1y": 0.1693087937178169
   },
   "BONDS": {
    "1m": 0.06870253321021338,
    "3m": 0.06299091232308374,
-   "1y": 0.05190583490219683
+   "1y": 0.051905834902196815
   },
   "LONGBONDS": {
    "1m": 0.11471327753402549,
-   "3m": 0.11053972804107799,
-   "1y": 0.09853483046109991
+   "3m": 0.110539728041078,
+   "1y": 0.09853483046109988
   },
   "REIT": {
-   "1m": 0.20231875567187735,
+   "1m": 0.2023187556718773,
    "3m": 0.1578585850826725,
    "1y": 0.14310711806552562
   },
   "GOLD": {
-   "1m": 0.3373953027652281,
+   "1m": 0.33739530276522817,
    "3m": 0.2568975712034612,
-   "1y": 0.29522017012484597
+   "1y": 0.2952201701248461
   },
   "COMMOD": {
    "1m": 0.20249615408232371,

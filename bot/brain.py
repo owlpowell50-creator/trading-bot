@@ -187,6 +187,59 @@ def edge_check(dt, research, since=RULES_SINCE):
     return out
 
 
+def tracking_check(s, strat, curve, trial):
+    """Is the live account doing what the rules should have produced? Compares the live equity change since the
+    trial started with the same period for the month's target mix, using the bot's own price series.
+    A gap of more than 1.5 points usually means an execution problem (missed trade, wrong fills, cash left idle)."""
+    if not curve or not trial or len(curve) < 3:
+        return None
+    d0, e0 = curve[0]; d1, e1 = curve[-1]
+    if d0 not in s.idx or d1 not in s.idx:
+        return None
+    i0, i1 = s.idx[d0], s.idx[d1]
+    me = st.MonthEnds(s)
+    k = max((m for m in me.me if m < i0), default=None)
+    if k is None:
+        return None
+    tgt = strat.target(s, me, k)
+    if not tgt:
+        return None
+    tot = sum(tgt.values()); tgt = {a: w / tot for a, w in tgt.items()}
+    model = sum(w * (s.levels[a][i1] / s.levels[a][i0] - 1) for a, w in tgt.items() if s.levels[a][i0] and s.levels[a][i1])
+    live = e1 / e0 - 1
+    return dict(start=d0, end=d1, live=live, model=model, gap=live - model, mix=tgt)
+
+
+def context_check(s, strat, cfg, curve):
+    """Is the live result normal? Looks at every stretch of the same length in the 1987-2026 backtest when US
+    stocks moved about as much as they did live, and reports how the bot did in those stretches."""
+    if not curve or len(curve) < 5:
+        return None
+    d0, d1 = curve[0][0], curve[-1][0]
+    if d0 not in s.idx or d1 not in s.idx:
+        return None
+    n = s.idx[d1] - s.idx[d0]
+    us = s.levels["US"]
+    mkt = us[s.idx[d1]] / us[s.idx[d0]] - 1
+    from . import backtest as bt
+    r = bt.run(s, strat, start="1987-06-01", cost_bps=cfg["cost_bps"], band=cfg["no_trade_band"])
+    eq = dict(zip(r.dates, r.equity))
+    ds = [d for d in r.dates if d in s.idx]
+    outs = []
+    for j in range(0, len(ds) - n):
+        a, b = ds[j], ds[j + n]
+        ia, ib = s.idx[a], s.idx[b]
+        if us[ia] and us[ib] and abs((us[ib] / us[ia] - 1) - mkt) <= 0.02:
+            outs.append(eq[b] / eq[a] - 1)
+    if len(outs) < 30:
+        return None
+    outs.sort()
+    q = lambda f: outs[int(f * (len(outs) - 1))]  # noqa: E731
+    live = curve[-1][1] / curve[0][1] - 1
+    rank = sum(1 for x in outs if x <= live) / len(outs)
+    return dict(days=n, market=mkt, live=live, n=len(outs), p10=q(0.10), p50=q(0.5), p90=q(0.90), rank=rank)
+
+
 def think(today: str | None = None):
     cfg = cfgmod.load()
     s = data.build_series()
@@ -250,6 +303,24 @@ def think(today: str | None = None):
     if stress:
         worst = min(stress.items(), key=lambda kv: kv[1])
         thoughts.append(f"worst stress scenario for today's holdings: {worst[0].lower()} {pct(worst[1])}")
+    # 4b is the live result normal, and is the account doing what the rules say?
+    try:
+        ctx = context_check(s, strat, cfg, curve)
+        if ctx:
+            where = ("better than most" if ctx["rank"] > 0.75 else "worse than most" if ctx["rank"] < 0.25 else "normal")
+            thoughts.append(f"since {curve[0][0]} the live account is {pct(ctx['live'])} with US stocks {pct(ctx['market'])}; in the 40-year backtest, "
+                            f"{ctx['days']}-day stretches with a similar market move left the bot between {pct(ctx['p10'])} and {pct(ctx['p90'])} "
+                            f"(middle {pct(ctx['p50'])}) - today's result is {where}")
+            if ctx["rank"] < 0.05:
+                alerts.append(("amber", f"live result {pct(ctx['live'])} is in the worst 5% of similar stretches in the backtest - check execution"))
+        trk = tracking_check(s, strat, curve, _load("trial.json"))
+        if trk:
+            thoughts.append(f"tracking: live {pct(trk['live'])} vs {pct(trk['model'])} for the rules' own mix over the same days (gap {pct(trk['gap'])})")
+            if abs(trk["gap"]) > 0.015:
+                alerts.append(("amber", f"live account is {pct(trk['gap'])} away from what the rules' mix returned since {trk['start']} - "
+                                        "look for a missed trade, odd fills or idle cash"))
+    except Exception as e:  # noqa: BLE001
+        thoughts.append(f"performance context unavailable ({e})")
     # 5 day trader
     if dt:
         if dt["unclosed"]:

@@ -1,0 +1,135 @@
+{
+ "Live (no guard)": {
+  "month_end": {
+   "cagr": 0.09618775500868515,
+   "mdd": -0.1760416154335701,
+   "sharpe": 1.0183270800628386,
+   "s1": 1.5220434436232295,
+   "s2": 0.7654159735980995
+  },
+  "med_sharpe": 1.0170643584170322,
+  "med_mdd": -0.19143489173860573,
+  "worst_mdd": -0.2913654405142081,
+  "med_cagr": 0.09523070273200462,
+  "trades": 0,
+  "crises": {
+   "Black Monday 1987": null,
+   "Gulf War recession 1990": -0.02674995706109673,
+   "Russia / LTCM 1998": 0.029420235710883924,
+   "Dot-com bust 2000-02": 0.26066224996156295,
+   "Global financial crisis 2007-09": 0.24742742296915,
+   "Flash crash / euro scare 2010": -0.10223045517184293,
+   "US downgrade / euro debt 2011": -0.06793849085203363,
+   "China / oil crash 2015-16": -0.08383936235272649,
+   "Q4 2018 sell-off": -0.13294036296459721,
+   "COVID crash 2020": 0.00735613770211585,
+   "Inflation bear market 2022": -0.06577376167465787,
+   "Tariff shock 2025": -0.07592574251006345
+  }
+ },
+ "G1: 10% off 3-month high and below 100-day average": {
+  "month_end": {
+   "cagr": 0.08185727965356526,
+   "mdd": -0.19298602487485206,
+   "sharpe": 0.9231286206302948,
+   "s1": 1.4434010494300433,
+   "s2": 0.6493226171570398
+  },
+  "med_sharpe": 0.9651376350855616,
+  "med_mdd": -0.17767567012867158,
+  "worst_mdd": -0.1980217112699988,
+  "med_cagr": 0.08496555848361431,
+  "trades": 0,
+  "crises": {
+   "Black Monday 1987": null,
+   "Gulf War recession 1990": -0.021340207552214996,
+   "Russia / LTCM 1998": 0.04100752679977071,
+   "Dot-com bust 2000-02": 0.19273149881128804,
+   "Global financial crisis 2007-09": 0.2561291089927047,
+   "Flash crash / euro scare 2010": -0.07795000165658528,
+   "US downgrade / euro debt 2011": -0.10695410357244717,
+   "China / oil crash 2015-16": -0.0839188887401825,
+   "Q4 2018 sell-off": -0.10628409779791426,
+   "COVID crash 2020": -0.011435416812437316,
+   "Inflation bear market 2022": -0.07916460640249912,
+   "Tariff shock 2025": -0.0760382748308377
+  },
+  "bootstrap": {
+   "p_beat": 0.0,
+   "cagr_diff_p5": -0.02052541370115657,
+   "cagr_diff_p50": -0.013277145479824393,
+   "cagr_diff_p95": -0.00685269733102678
+  },
+  "adopt": false
+ },
+ "G2: 15% off 3-month high": {
+  "month_end": {
+   "cagr": 0.08737889694810774,
+   "mdd": -0.1760556659163245,
+   "sharpe": 0.9492639445862191,
+   "s1": 1.4731793219340379,
+   "s2": 0.6825418660203362
+  },
+  "med_sharpe": 0.9880366509149662,
+  "med_mdd": -0.1755510147173756,
+  "worst_mdd": -0.25049035716248813,
+  "med_cagr": 0.09078623535467911,
+  "trades": 0,
+  "crises": {
+   "Black Monday 1987": null,
+   "Gulf War recession 1990": -0.03710151693061814,
+   "Russia / LTCM 1998": 0.029420235710884368,
+   "Dot-com bust 2000-02": 0.23804207832931823,
+   "Global financial crisis 2007-09": 0.23238163979395465,
+   "Flash crash / euro scare 2010": -0.10223045517184337,
+   "US downgrade / euro debt 2011": -0.11223917883746182,
+   "China / oil crash 2015-16": -0.08384981152829674,
+   "Q4 2018 sell-off": -0.12603956629028257,
+   "COVID crash 2020": -0.02229533035929321,
+   "Inflation bear market 2022": -0.07779384927445143,
+   "Tariff shock 2025": -0.07592574251006401
+  },
+  "bootstrap": {
+   "p_beat": 0.0,
+   "cagr_diff_p5": -0.01290704368580986,
+   "cagr_diff_p50": -0.008473426138393858,
+   "cagr_diff_p95": -0.004777658341422519
+  },
+  "adopt": false
+ },
+ "G3: 10% fall in 10 trading days": {
+  "month_end": {
+   "cagr": 0.08985558866502541,
+   "mdd": -0.18060552836394617,
+   "sharpe": 0.9717960282376796,
+   "s1": 1.500423254861181,
+   "s2": 0.6990463133828697
+  },
+  "med_sharpe": 1.008635837292111,
+  "med_mdd": -0.17298003563271624,
+  "worst_mdd": -0.23638490339494334,
+  "med_cagr": 0.09228438673161565,
+  "trades": 0,
+  "crises": {
+   "Black Monday 1987": null,
+   "Gulf War recession 1990": -0.02674995706109773,
+   "Russia / LTCM 1998": 0.02942023571088348,
+   "Dot-com bust 2000-02": 0.23711348873222882,
+   "Global financial crisis 2007-09": 0.271307860983784,
+   "Flash crash / euro scare 2010": -0.0949708320918512,
+   "US downgrade / euro debt 2011": -0.09075399062396683,
+   "China / oil crash 2015-16": -0.08891895856131793,
+   "Q4 2018 sell-off": -0.132940362964597,
+   "COVID crash 2020": -0.016696250568568494,
+   "Inflation bear market 2022": -0.09199374789646741,
+   "Tariff shock 2025": -0.07550512486924743
+  },
+  "bootstrap": {
+   "p_beat": 0.001,
+   "cagr_diff_p5": -0.010159552851598974,
+   "cagr_diff_p50": -0.006290072757239473,
+   "cagr_diff_p95": -0.002588351681424017
+  },
+  "adopt": false
+ }
+}

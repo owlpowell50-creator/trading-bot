@@ -497,3 +497,16 @@ class EdgeCheck(unittest.TestCase):
         res = {"rows": [{"name": "Live rule now, target 3.0x range", "second": {"avg": 0.15}}], "years_confirmed": {}}
         dt = {"trades": [{"date": "2026-12-01", "strategy": "ORB", "exit": 1, "r": r} for r in (1.0, -1.0, 2.0, -1.0, 0.2)]}
         self.assertFalse(any(o[0] == "alert" for o in edge_check(dt, res)))
+
+
+class PerformanceContext(unittest.TestCase):
+    def test_tracking_and_context_run_on_real_series(self):
+        from bot import brain, data, config, strategies as st
+        cfg = config.load(); s = data.build_series()
+        strat = st.by_name(cfg["strategy"], cfg["vol_cap"], cfg["max_single_asset"])
+        d = s.dates[-25:]
+        curve = [(x, 100000 * s.levels["US"][s.idx[x]] / s.levels["US"][s.idx[d[0]]]) for x in d]
+        t = brain.tracking_check(s, strat, curve, {"start": d[0]})
+        self.assertIsNotNone(t); self.assertAlmostEqual(t["live"], curve[-1][1] / curve[0][1] - 1)
+        c = brain.context_check(s, strat, cfg, curve)
+        self.assertTrue(c is None or 0 <= c["rank"] <= 1)

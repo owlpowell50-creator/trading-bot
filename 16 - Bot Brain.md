@@ -27,6 +27,8 @@ tags:
 - S&P 500 is -0.8% vs its 200-day average and -6.9% from its 1-year high
 - live account -4.0% from its high
 - worst stress scenario for today's holdings: equity crash -20.7%
+- since 2026-11-12 the live account is -4.0% with US stocks -4.2%; in the 40-year backtest, 10-day stretches with a similar market move left the bot between -3.4% and +1.6% (middle -0.9%) - today's result is worse than most
+- tracking: live -4.0% vs -4.0% for the rules' own mix over the same days (gap -0.1%)
 - day trader last 7 sessions: 14 closed trades, 7 winners, avg R -0.18
 - skill pack looked at 84 breakouts; most common decision: time machine (76)
 - day trader's current rules expect about +0.15R a trade (2021-now) - no live trades under them yet
