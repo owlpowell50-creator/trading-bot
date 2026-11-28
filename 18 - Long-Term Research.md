@@ -5,7 +5,7 @@ department_color: "#22C55E"
 cssclasses:
   - dept-trading
 generated: trading-bot
-updated: 2026-11-27
+updated: 2026-11-28
 tags:
   - type/research
   - department/trading
@@ -20,13 +20,13 @@ New ideas for the long-term bot, each a small change to the live strategy, repla
 
 | Idea | Growth / yr | Worst fall | Sharpe | Sharpe 1987-2006 | Sharpe 2007-now | Passes step 1-2 |
 |---|---|---|---|---|---|---|
-| Live bot | 9.40% | -17.6% | 0.99 | 1.43 | 0.76 | — |
-| Skip a pick if 6-month correlation > 0.8 with a better one | 9.30% | -15.1% | 1.04 | 1.48 | 0.81 | yes |
-| Skip a pick if 6-month correlation > 0.6 with a better one | 8.35% | -14.7% | 1.01 | 1.50 | 0.72 | no |
-| Rank by momentum per unit of risk | 9.43% | -15.2% | 1.05 | 1.41 | 0.84 | no |
-| Park half of unused cash in 7-10y Treasuries when they trend up | 9.38% | -17.6% | 0.99 | 1.42 | 0.76 | no |
-| Skip the latest month in momentum (12-1 style) | 8.51% | -27.5% | 0.87 | 1.37 | 0.61 | no |
-| Halve exposure if the chosen mix fell 8%+ over 3 months | 9.40% | -17.6% | 0.99 | 1.43 | 0.76 | no |
+| Live bot | 9.44% | -17.6% | 1.00 | 1.43 | 0.77 | — |
+| Skip a pick if 6-month correlation > 0.8 with a better one | 9.33% | -15.1% | 1.05 | 1.48 | 0.81 | yes |
+| Skip a pick if 6-month correlation > 0.6 with a better one | 8.38% | -14.7% | 1.01 | 1.50 | 0.72 | no |
+| Rank by momentum per unit of risk | 9.47% | -15.2% | 1.05 | 1.41 | 0.84 | no |
+| Park half of unused cash in 7-10y Treasuries when they trend up | 9.41% | -17.6% | 0.99 | 1.42 | 0.77 | no |
+| Skip the latest month in momentum (12-1 style) | 8.54% | -27.5% | 0.87 | 1.37 | 0.62 | no |
+| Halve exposure if the chosen mix fell 8%+ over 3 months | 9.44% | -17.6% | 1.00 | 1.43 | 0.77 | no |
 
 ## Closer look: Skip a pick if 6-month correlation > 0.8 with a better one
 
@@ -57,7 +57,7 @@ New ideas for the long-term bot, each a small change to the live strategy, repla
 | 2023 | +3.4% | +1.6% |
 | 2024 | +18.4% | +15.0% |
 | 2025 | +24.3% | +21.9% |
-| 2026 | +13.3% | +7.8% |
+| 2026 | +14.6% | +9.0% |
 
 Beat the live bot in **49.5%** of 2,000 resampled histories (growth difference, middle case -0.01 points a year).
 
@@ -95,6 +95,20 @@ The identical strategy, deciding on a different day of the month. Growth barely 
 | month-end (live) | 9.59% | -17.6% | 1.02 | 2016-01-20 |
 
 **What this means:** expect about 9.5% a year whichever day it trades, but plan for a worst fall of about -19% (typical) and up to -29% - not the -17.6% the month-end backtest shows. The live risk limit (stop and ask at -25%) sits inside that range, so an unlucky year could trigger it - that would be the limit doing its job, not a malfunction.
+
+
+## Crash guards (sell one asset mid-month only on a deep, fast fall)
+
+The plain 200-day crash brake was rejected in [[09 - Upgrades Tested]] for whipsaw. These three guards were declared before testing and judged on 12 rebalance days, so no result rests on calendar luck.
+
+| Version | Growth / yr (month-end) | Worst fall (month-end) | Sharpe 1987-2006 / 2007-now | Median Sharpe, 12 days | Median worst fall | Worst of the 12 | Beat live in resampling |
+|---|---|---|---|---|---|---|---|
+| Live (no guard) | 9.62% | -17.6% | 1.52 / 0.77 | 1.02 | -19.1% | -29.1% | — |
+| G1: 10% off 3-month high and below 100-day average | 8.19% | -19.3% | 1.44 / 0.65 | 0.97 | -17.8% | -19.8% | 0% |
+| G2: 15% off 3-month high | 8.74% | -17.6% | 1.47 / 0.68 | 0.99 | -17.6% | -25.0% | 0% |
+| G3: 10% fall in 10 trading days | 8.99% | -18.1% | 1.50 / 0.70 | 1.01 | -17.3% | -23.6% | 0% |
+
+**Not adopted.** Every guard lowers growth (0.6-1.4 points a year) and Sharpe, and none beat the live bot in any resampled history. What they buy is a smaller *worst case*: G1 keeps the worst fall near -20% on every rebalance day, against up to -29% without it. That is a preference, not an improvement - if you would rather give up about 1.4 points a year for a lower worst case, G1 is the one to switch on.
 
 
 Back to [[16 - Bot Brain]] · [[03 - Backtest Report]] · [[17 - Day Trader Research]]

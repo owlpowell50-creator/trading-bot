@@ -192,6 +192,21 @@ def main():
                   f"**What this means:** expect about {_st.median(cg)*100:.1f}% a year whichever day it trades, but plan for a worst fall of about "
                   f"{_st.median(md)*100:.0f}% (typical) and up to {min(md)*100:.0f}% - not the {sc[-1]['mdd']*100:.1f}% the month-end backtest shows. "
                   "The live risk limit (stop and ask at -25%) sits inside that range, so an unlucky year could trigger it - that would be the limit doing its job, not a malfunction.", ""]
+    cg = root / "state" / "crash_guard.json"
+    if cg.exists():
+        g = json.loads(cg.read_text())
+        L += ["", "## Crash guards (sell one asset mid-month only on a deep, fast fall)", "",
+              "The plain 200-day crash brake was rejected in [[09 - Upgrades Tested]] for whipsaw. These three guards were declared before testing and "
+              "judged on 12 rebalance days, so no result rests on calendar luck.", "",
+              "| Version | Growth / yr (month-end) | Worst fall (month-end) | Sharpe 1987-2006 / 2007-now | Median Sharpe, 12 days | Median worst fall | Worst of the 12 | Beat live in resampling |",
+              "|---|---|---|---|---|---|---|---|"]
+        for k, r in g.items():
+            me = r["month_end"]
+            L.append(f"| {k} | {me['cagr']*100:.2f}% | {me['mdd']*100:.1f}% | {me['s1']:.2f} / {me['s2']:.2f} | {r['med_sharpe']:.2f} | "
+                     f"{r['med_mdd']*100:.1f}% | {r['worst_mdd']*100:.1f}% | {(str(round(r['bootstrap']['p_beat']*100)) + '%') if 'bootstrap' in r else '—'} |")
+        L += ["", "**Not adopted.** Every guard lowers growth (0.6-1.4 points a year) and Sharpe, and none beat the live bot in any resampled history. "
+              "What they buy is a smaller *worst case*: G1 keeps the worst fall near -20% on every rebalance day, against up to -29% without it. "
+              "That is a preference, not an improvement - if you would rather give up about 1.4 points a year for a lower worst case, G1 is the one to switch on.", ""]
     L += ["", "Back to [[16 - Bot Brain]] · [[03 - Backtest Report]] · [[17 - Day Trader Research]]", ""]
     _write(root / "18 - Long-Term Research.md", "\n".join(L))
 
